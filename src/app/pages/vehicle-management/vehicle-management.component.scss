@@ -23,54 +23,24 @@
   color: #2b2b2b;
 }
 
-/*
-.facility-row {
-  margin-top: 14px;
+/* -------- Shared width wrapper (Facilities + Board) -------- */
+.content-wrap {
+  width: 100%;
+  max-width: 1400px; /* adjust if you want wider/narrower */
+  margin: 0 auto;
+}
+
+.layout--vertical {
   display: flex;
-  gap: 14px;
-  align-items: center;
-}
-.facility-label {
-  font-weight: 800;
-  color: #f0f0f0;
-  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
-}
-.select-wrap {
-  position: relative;
-  display: inline-block;
-}
-.select {
-  appearance: none;
-  border: none;
-  outline: none;
-  padding: 12px 44px 12px 18px;
-  border-radius: 14px;
-  background: #0c0c0c;
-  color: #ffffff;
-  font-weight: 800;
-  font-size: 16px;
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.35);
-}
-.select-caret {
-  position: absolute;
-  right: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #d7d7d7;
-  pointer-events: none;
-  font-weight: 900;
-}
-*/
-
-.layout {
-  margin-top: 18px;
-  display: grid;
-  grid-template-columns: 260px 1fr;
-  gap: 18px;
-  align-items: start;
+  flex-direction: column;
+  gap: 16px;
 }
 
-/* Sidebar */
+/* -------- Facilities row -------- */
+.facilities-row {
+  width: 100%;
+}
+
 .sidebar-card {
   border-radius: 22px;
   padding: 16px;
@@ -85,32 +55,28 @@
   margin-bottom: 12px;
 }
 
-.fac-table {
-  border-radius: 16px;
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.fac-row {
-  display: grid;
-  grid-template-columns: 1fr 60px;
-  gap: 10px;
-  padding: 12px 12px;
-  align-items: center;
-  color: #fff;
-}
-
-.fac-head {
-  background: rgba(255, 255, 255, 0.06);
-  font-weight: 900;
+/* HORIZONTAL facility buttons */
+.fac-items {
+  display: flex;
+  gap: 12px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding-bottom: 6px;
 }
 
 .fac-item {
-  width: 100%;
-  text-align: left;
-  border: none;
+  flex: 0 0 auto;
+  min-width: 220px;
+  border-radius: 14px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(0, 0, 0, 0.25);
   cursor: pointer;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #fff;
 }
 
 .fac-item:hover {
@@ -123,11 +89,10 @@
 }
 
 .fac-item .name {
-  font-weight: 800;
+  font-weight: 900;
 }
 
-.right {
-  text-align: right;
+.fac-item .count {
   font-weight: 900;
   color: rgba(255, 255, 255, 0.75);
 }
@@ -138,7 +103,11 @@
   color: rgba(255, 255, 255, 0.55);
 }
 
-/* Board container */
+/* -------- Board -------- */
+.board-row {
+  width: 100%;
+}
+
 .board-shell {
   border-radius: 22px;
   padding: 18px 18px 22px;
@@ -155,8 +124,10 @@
 
 .columns {
   display: grid;
-  grid-template-columns: repeat(4, minmax(230px, 1fr));
   gap: 18px;
+
+  /* Desktop: 5 columns */
+  grid-template-columns: repeat(5, minmax(220px, 1fr));
 }
 
 .col-card {
@@ -242,21 +213,29 @@
   margin: 0;
 }
 
-/* Responsive */
-@media (max-width: 1200px) {
-  .layout {
-    grid-template-columns: 1fr;
-  }
+/* -------- Responsive board layout -------- */
+@media (max-width: 1300px) {
   .columns {
-    grid-template-columns: repeat(2, minmax(230px, 1fr));
+    grid-template-columns: repeat(3, minmax(220px, 1fr));
   }
 }
 
-@media (max-width: 700px) {
+@media (max-width: 900px) {
+  .columns {
+    grid-template-columns: repeat(2, minmax(220px, 1fr));
+  }
+}
+
+@media (max-width: 650px) {
   .page {
     padding: 26px 18px 40px;
   }
   .columns {
     grid-template-columns: 1fr;
+  }
+
+  /* Facilities still horizontal, but smaller cards */
+  .fac-item {
+    min-width: 180px;
   }
 }

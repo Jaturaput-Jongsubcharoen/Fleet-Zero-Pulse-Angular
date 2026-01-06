@@ -1,0 +1,67 @@
+<div class="station">
+  <div class="topbar">
+    <a class="back" routerLink="/">Back to Dashboard</a>
+    <div class="title">{{ facilityName }} — Bus Management</div>
+  </div>
+
+  <section class="section" *ngFor="let c of categories">
+    <div class="section-title">
+      {{ c.label }} ({{ board()[c.id].length }} buses)
+    </div>
+
+    <div class="bus-card" *ngFor="let bus of board()[c.id]">
+      <div class="bus-left">
+        <div class="bus-name">{{ bus.label }}</div>
+        <div class="bus-meta"><b>Status:</b> {{ bus.status }}</div>
+        <div class="bus-meta"><b>Last Service:</b> {{ bus.lastService || '--' }}</div>
+        <div class="bus-meta"><b>Notes:</b> {{ bus.notes || '--' }}</div>
+      </div>
+
+      <button class="edit-btn" type="button" (click)="startEdit(c.id, bus)">Edit</button>
+    </div>
+  </section>
+
+  <!-- Overlay (click outside to close) -->
+  <div
+    class="sheet-overlay"
+    *ngIf="isSheetOpen"
+    [class.visible]="isSheetVisible"
+    (click)="cancelEdit()"
+  ></div>
+
+  <!-- Sheet only renders when editing exists -->
+  <ng-container *ngIf="isSheetOpen && editing as e">
+    <div class="sheet" [class.visible]="isSheetVisible" (click)="$event.stopPropagation()">
+      <div class="sheet-header">
+        <div class="sheet-title">Edit {{ e.bus.label }}</div>
+        <button class="x" type="button" (click)="cancelEdit()">✕</button>
+      </div>
+
+      <div class="sheet-body">
+        <label>
+          Status (Category)
+          <select [(ngModel)]="e.toCatId">
+            <option *ngFor="let c of categories" [ngValue]="c.id">
+              {{ c.label }}
+            </option>
+          </select>
+        </label>
+
+        <label>
+          Last Service
+          <input type="date" [(ngModel)]="editing.bus.lastService"/>
+        </label>
+
+        <label>
+          Notes
+          <textarea [(ngModel)]="e.bus.notes"></textarea>
+        </label>
+      </div>
+
+      <div class="sheet-actions">
+        <button class="btn ghost" type="button" (click)="cancelEdit()">Cancel</button>
+        <button class="btn primary" type="button" (click)="saveEdit()">Save</button>
+      </div>
+    </div>
+  </ng-container>
+</div>

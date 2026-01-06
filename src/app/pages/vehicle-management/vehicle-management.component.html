@@ -3,111 +3,98 @@
   <header class="header">
     <h1 class="title">{{ title }}</h1>
     <div class="subtitle">{{ subtitle }}</div>
-    <!--
-    <div class="facility-row">
-      <div class="facility-label">Select Facility:</div>
-
-      <div class="select-wrap">
-        <select
-          class="select"
-          [value]="selectedFacilityId"
-          (change)="onSelectFacility(($any($event.target)).value)"
-        >
-          <option *ngFor="let f of facilities; trackBy: trackByFacilityId" [value]="f.id">
-            {{ f.name }}
-          </option>
-        </select>
-        <div class="select-caret">▾</div>
-      </div>
-    </div>
-    -->
   </header>
 
-  <!-- Layout -->
-  <div class="layout">
-    <!-- LEFT: Facilities table -->
-    <aside class="sidebar">
-      <div class="sidebar-card">
-        <div class="sidebar-title">Facilities</div>
+  <!-- CONTENT WRAP: forces Facilities + Board to share same width -->
+  <div class="content-wrap">
+    <div class="layout layout--vertical">
 
-        <div class="fac-table">
-          <div class="fac-row fac-head">
-            <div>Name</div>
-            <div class="right">Buses</div>
+      <!-- TOP ROW: Facilities (HORIZONTAL) -->
+      <section class="facilities-row">
+        <div class="sidebar-card">
+          <div class="sidebar-title">Facilities</div>
+
+          <div class="fac-items">
+            <button
+              class="fac-item"
+              *ngFor="let f of facilities; trackBy: trackByFacilityId"
+              [class.active]="f.id === selectedFacilityId"
+              (click)="onSelectFacility(f.id)"
+              type="button"
+            >
+              <div class="name">{{ f.name }}</div>
+              <div class="count">{{ facilityTotal(f.id) }}</div>
+            </button>
           </div>
 
-          <button
-            class="fac-row fac-item"
-            *ngFor="let f of facilities; trackBy: trackByFacilityId"
-            [class.active]="f.id === selectedFacilityId"
-            (click)="onSelectFacility(f.id)"
-            type="button"
-          >
-            <div class="name">{{ f.name }}</div>
-            <div class="right">{{ facilityTotal(f.id) }}</div>
-          </button>
+          <div class="sidebar-hint">
+            Tip: Drag buses between columns to change status.
+          </div>
         </div>
+      </section>
 
-        <div class="sidebar-hint">
-          Tip: Drag buses between columns to change status.
-        </div>
-      </div>
-    </aside>
+      <!-- BOTTOM ROW: Board -->
+      <section class="board-row">
+        <section class="board-shell">
+          <div class="board-title">{{ selectedFacility.name }}</div>
 
-    <!-- RIGHT: Board -->
-    <section class="board-shell">
-      <div class="board-title">{{ selectedFacility.name }}</div>
-
-      <div class="columns">
-        <div class="col" *ngFor="let c of categories; trackBy: trackByCategoryId">
-          <div class="col-card">
-            <div class="col-header">
-              <span class="col-name">{{ c.label }}</span>
-              <span class="col-count">({{ count(c.id) }} buses)</span>
-            </div>
-
-            <div
-              class="dropzone"
-              cdkDropList
-              [id]="dropListId(c.id)"
-              [cdkDropListData]="board[c.id]"
-              [cdkDropListConnectedTo]="connectedDropListIds"
-              (cdkDropListDropped)="onDrop(c.id, $event)"
-            >
-              <div
-                class="bus"
-                *ngFor="let bus of board[c.id]; trackBy: trackByBusId"
-                cdkDrag
-                (dblclick)="openBusSnapshot(bus)"
-              >
-                <div class="grip" aria-hidden="true">
-                  <span>•</span><span>•</span>
-                  <span>•</span><span>•</span>
+          <div class="columns">
+            <div class="col" *ngFor="let c of categories; trackBy: trackByCategoryId">
+              <div class="col-card">
+                <div class="col-header">
+                  <span class="col-name">{{ c.label }}</span>
+                  <span class="col-count">({{ count(c.id) }} buses)</span>
                 </div>
-                <div class="bus-label">{{ bus.label }}</div>
 
-                <ng-template cdkDragPlaceholder>
-                  <div class="bus bus--placeholder"></div>
-                </ng-template>
-
-                <ng-template cdkDragPreview>
-                  <div class="bus bus--preview">
+                <div
+                  class="dropzone"
+                  cdkDropList
+                  [id]="dropListId(c.id)"
+                  [cdkDropListData]="board[c.id]"
+                  [cdkDropListConnectedTo]="connectedDropListIds"
+                  (cdkDropListDropped)="onDrop(c.id, $event)"
+                >
+                  <div
+                    class="bus"
+                    *ngFor="let bus of board[c.id]; trackBy: trackByBusId"
+                    cdkDrag
+                    (dblclick)="openBusSnapshot(bus, c.label)"
+                  >
                     <div class="grip" aria-hidden="true">
                       <span>•</span><span>•</span>
                       <span>•</span><span>•</span>
                     </div>
                     <div class="bus-label">{{ bus.label }}</div>
+
+                    <ng-template cdkDragPlaceholder>
+                      <div class="bus bus--placeholder"></div>
+                    </ng-template>
+
+                    <ng-template cdkDragPreview>
+                      <div class="bus bus--preview">
+                        <div class="grip" aria-hidden="true">
+                          <span>•</span><span>•</span>
+                          <span>•</span><span>•</span>
+                        </div>
+                        <div class="bus-label">{{ bus.label }}</div>
+                      </div>
+                    </ng-template>
                   </div>
-                </ng-template>
+                </div>
               </div>
             </div>
-            <div *ngIf="isSnapshotOpen && selectedBus" style="margin-top: 20px; color: white;">
-            Snapshot: {{ selectedBus.label }}
-            <button (click)="closeBusSnapshot()">Close</button>
-            </div>
           </div>
-        </div>
-      </div>
-    </section>
+        </section>
+      </section>
+
+    </div>
   </div>
+
+  <!-- Snapshot Modal -->
+  <app-bus-snapshot
+    *ngIf="isSnapshotOpen && selectedBus"
+    [bus]="selectedBus"
+    (close)="closeBusSnapshot()"
+    (viewFull)="closeBusSnapshot()"
+  ></app-bus-snapshot>
 </div>

@@ -1,0 +1,230 @@
+.station {
+  min-height: 100vh;
+  padding: 18px 16px 120px;
+  background: #777;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+.topbar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.back {
+  display: inline-block;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #2b2b2b;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 800;
+  font-size: 12px;
+}
+
+.title {
+  font-weight: 900;
+  font-size: 16px;
+  color: #111;
+}
+
+.section {
+  margin-top: 14px;
+}
+
+.section-title {
+  font-weight: 900;
+  color: #fff;
+  margin-bottom: 10px;
+  text-shadow: 0 1px 0 rgba(0,0,0,0.25);
+}
+
+.bus-card {
+  background: linear-gradient(#111, #0b0b0b);
+  border-radius: 14px;
+  padding: 14px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: start;
+  box-shadow: 0 12px 26px rgba(0,0,0,0.35);
+  margin-bottom: 12px;
+}
+
+.bus-name {
+  font-weight: 900;
+  color: #fff;
+  margin-bottom: 8px;
+}
+
+.bus-meta {
+  color: rgba(255,255,255,0.8);
+  font-size: 12px;
+  margin-top: 3px;
+}
+
+.edit-btn {
+  border: none;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-weight: 900;
+  background: #f2f2f2;
+  color: #111;
+  cursor: pointer;
+  height: fit-content;
+}
+
+/* bottom sheet editor */
+.sheet-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 9998;
+
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+
+.sheet-overlay.visible {
+  opacity: 1;
+}
+
+.sheet {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  border-radius: 16px;
+  background: #101010;
+  border: 1px solid rgba(255,255,255,0.08);
+  z-index: 9999;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.55);
+  overflow: hidden;
+
+  opacity: 0;
+  transform: translateY(14px) scale(0.98);
+  transition: opacity 200ms ease, transform 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.sheet.visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+select {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.05);
+  padding: 10px 12px;
+  color: #fff;
+  outline: none;
+}
+
+.sheet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.sheet-title {
+  color: #fff;
+  font-weight: 900;
+}
+
+.x {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+  cursor: pointer;
+}
+
+/* ===== Bottom Sheet Form Fields ===== */
+.sheet-body input,
+.sheet-body textarea,
+.sheet-body select {
+  background: #ffffff;
+  color: #000000;
+  border: 1px solid #cfcfcf;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+}
+
+/* Dropdown options (important for select) */
+.sheet-body select option {
+  background: #ffffff;
+  color: #000000;
+}
+
+/* Placeholder text */
+.sheet-body input::placeholder,
+.sheet-body textarea::placeholder {
+  color: #666666;
+}
+
+/* Focus state (nice UX) */
+.sheet-body input:focus,
+.sheet-body textarea:focus,
+.sheet-body select:focus {
+  outline: none;
+  border-color: #1f8b3a;
+  box-shadow: 0 0 0 2px rgba(31, 139, 58, 0.25);
+}
+
+
+
+label {
+  color: rgba(255,255,255,0.85);
+  font-size: 12px;
+  font-weight: 800;
+  display: grid;
+  gap: 6px;
+}
+
+input, textarea {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 10px 12px;
+  color: #fff;
+  outline: none;
+}
+
+textarea {
+  min-height: 70px;
+  resize: vertical;
+}
+
+.sheet-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 12px 14px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+.btn {
+  border: none;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.btn.ghost {
+  background: #f2f2f2;
+  color: #111;
+}
+
+.btn.primary {
+  background: #f2f2f2;
+  color: #111;
+}
