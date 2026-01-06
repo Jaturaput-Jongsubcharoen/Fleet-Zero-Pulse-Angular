@@ -1,0 +1,74 @@
+<div class="page">
+  <header class="header">
+    <h1 class="title">Fleet Zero Pulse</h1>
+    <div class="subtitle">Vehicle Management</div>
+
+    <div class="facility-row">
+      <div class="facility-label">Select Facility:</div>
+
+      <div class="select-wrap">
+        <select
+          class="select"
+          [value]="selectedFacilityId()"
+          (change)="onFacilityChange(($any($event.target)).value)"
+        >
+          <option *ngFor="let f of facilities" [value]="f.id">{{ f.name }}</option>
+        </select>
+        <div class="select-caret">▾</div>
+      </div>
+    </div>
+  </header>
+
+  <section class="board-shell">
+    <div class="board-title">
+      {{ facilities.find(f => f.id === selectedFacilityId())?.name }}
+    </div>
+
+    <div class="columns">
+      <div class="col" *ngFor="let c of categories">
+        <div class="col-card">
+          <div class="col-header">
+            <span class="col-name">{{ c.label }}</span>
+            <span class="col-count">({{ count(c.id) }} buses)</span>
+          </div>
+
+          <div
+            class="dropzone"
+            cdkDropList
+            [id]="dropListId(selectedFacilityId(), c.id)"
+            [cdkDropListData]="board()[c.id]"
+            [cdkDropListConnectedTo]="connectedDropListIds()"
+            (cdkDropListDropped)="drop(c.id, $event)"
+          >
+            <div
+              class="bus"
+              *ngFor="let bus of board()[c.id]; trackBy: bus.id"
+              cdkDrag
+            >
+              <div class="grip" aria-hidden="true">
+                <span>•</span><span>•</span>
+                <span>•</span><span>•</span>
+              </div>
+              <div class="bus-label">{{ bus.label }}</div>
+
+              <!-- drag preview template look -->
+              <ng-template cdkDragPreview>
+                <div class="bus bus--preview">
+                  <div class="grip" aria-hidden="true">
+                    <span>•</span><span>•</span>
+                    <span>•</span><span>•</span>
+                  </div>
+                  <div class="bus-label">{{ bus.label }}</div>
+                </div>
+              </ng-template>
+
+              <ng-template cdkDragPlaceholder>
+                <div class="bus bus--placeholder"></div>
+              </ng-template>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
