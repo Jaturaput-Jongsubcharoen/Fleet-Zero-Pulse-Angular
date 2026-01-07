@@ -1,7 +1,7 @@
 .station {
   min-height: 100vh;
   padding: 18px 16px 120px;
-  background: #777;
+  background: #ffffff;
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
 }
 
@@ -35,7 +35,7 @@
 
 .section-title {
   font-weight: 900;
-  color: #fff;
+  color: #000000;
   margin-bottom: 10px;
   text-shadow: 0 1px 0 rgba(0,0,0,0.25);
 }
@@ -155,6 +155,15 @@ select {
   border-radius: 8px;
   padding: 10px 12px;
   font-size: 14px;
+  width: 100%;
+  margin: 0 10% 16px 0;
+}
+
+.sheet-body {
+  max-width: 520px;   
+  margin: 0 auto; 
+  display: grid;
+  gap: 14px;
 }
 
 /* Dropdown options (important for select) */
