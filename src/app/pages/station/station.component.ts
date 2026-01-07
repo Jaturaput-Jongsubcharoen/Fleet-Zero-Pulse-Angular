@@ -3,7 +3,7 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 
-import { CATEGORIES, CategoryId, BusDetails, FACILITIES } from '../../data/fleet-store';
+import { CATEGORIES, CategoryId, BusDetails, FACILITIES, FacilityId } from '../../data/fleet-store';
 import { FleetService } from '../../data/fleet.service';
 
 @Component({
@@ -17,8 +17,9 @@ export class StationComponent {
   categories = CATEGORIES;
   facilities = FACILITIES;
 
-  facilityId: string = 'facility_a';
-  facilityName: string = 'Facility A';
+  // now this is a LOCATION/YARD id (FacilityId)
+  facilityId: FacilityId = 'Miller BRT';
+  facilityName = 'Miller BRT';
 
   // animation states
   isSheetOpen = false;
@@ -34,11 +35,12 @@ export class StationComponent {
     | null = null;
 
   constructor(private route: ActivatedRoute, private fleet: FleetService) {
-    // this is really important. subscribe so it works when route param changes without reloading page
+    // subscribe so it works when route param changes without reloading page
     this.route.paramMap.subscribe((params) => {
-      this.facilityId = params.get('facilityId') ?? 'facility_a';
-      this.facilityName =
-        this.facilities.find((f) => f.id === this.facilityId)?.name ?? this.facilityId;
+      const raw = (params.get('facilityId') ?? 'Miller BRT') as FacilityId;
+
+      this.facilityId = raw;
+      this.facilityName = this.facilities.find((f) => f.id === this.facilityId)?.name ?? this.facilityId;
 
       // optional: close editor when switching facility
       this.isSheetOpen = false;
@@ -69,19 +71,44 @@ export class StationComponent {
     }, 200);
   }
 
+  private categoryLabel(catId: CategoryId): string {
+    return this.categories.find((c) => c.id === catId)?.label ?? '';
+  }
+
+  private needsBay(catId: CategoryId): boolean {
+    return catId === 'maintenance' || catId === 'long_term';
+  }
+
+  // you can change these bay ranges anytime
+  private randomBayNumber(): number {
+    // example: bays 1..12
+    return Math.floor(Math.random() * 12) + 1;
+  }
+
   saveEdit() {
     if (!this.editing) return;
 
     const { fromCatId, toCatId, bus } = this.editing;
 
-    // Yes my option: keep bus.status consistent with the category label
-    const toLabel = this.categories.find((c) => c.id === toCatId)?.label ?? bus.status;
+    const toLabel = this.categoryLabel(toCatId) || bus.status;
 
-    // 1) update details (save values the user edited)
+    // Decide bay rules based on category
+    let nextBay: number | null | undefined = bus.bay;
+
+    if (this.needsBay(toCatId)) {
+      // if moving into Maintenance/Long-term, auto assign if missing
+      if (nextBay == null) nextBay = this.randomBayNumber();
+    } else {
+      // if moving out of those columns, clear bay
+      nextBay = null;
+    }
+
+    // 1) update details in the current list
     this.fleet.updateBus(this.facilityId, fromCatId, bus.id, {
-      status: toLabel, // << keeps it matched with category
+      status: toLabel,      // keep status matched with category label
       lastService: bus.lastService,
       notes: bus.notes,
+      bay: nextBay ?? undefined, // ensure bay exists only when allowed
     });
 
     // 2) move bus to another category if changed

@@ -1,13 +1,24 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
+import {
+  CdkDragDrop,
+  DragDropModule,
+  moveItemInArray,
+} from '@angular/cdk/drag-drop';
 import { FormsModule } from '@angular/forms';
 
 import { BusSnapshotComponent } from '../../components/bus-snapshot/bus-snapshot.component';
-import { CATEGORIES, FACILITIES, CategoryId, Board, BusDetails } from '../../data/fleet-store';
+import {
+  CATEGORIES,
+  FACILITIES,
+  CategoryId,
+  Board,
+  BusDetails,
+  FacilityId,
+} from '../../data/fleet-store';
 import { FleetService } from '../../data/fleet.service';
 
-type Facility = { id: string; name: string };
+type Facility = { id: FacilityId; name: string };
 
 @Component({
   selector: 'app-vehicle-management',
@@ -17,19 +28,17 @@ type Facility = { id: string; name: string };
   styleUrl: './vehicle-management.component.scss',
 })
 export class VehicleManagementComponent {
-  title = 'Fleet Zero Pulse';
-  subtitle = 'Vehicle Management';
+  title = 'Fleet Pulse';
+  subtitle = 'Vehicle Management Dashboard';
 
-  facilities: Facility[] = FACILITIES;
+  readonly facilities = FACILITIES;
   categories = CATEGORIES;
 
-  selectedFacilityId = this.facilities[0].id;
+  selectedFacilityId: FacilityId = this.facilities[0].id;
 
   // Search
   searchQuery = '';
   searchResults: BusDetails[] = [];
-
-  // allow undefined so ?. is valid and warning disappears
   searchMetaById: Record<
     string,
     { categoryId: CategoryId; categoryLabel: string } | undefined
@@ -38,7 +47,7 @@ export class VehicleManagementComponent {
   // Snapshot modal
   selectedBus:
     | (BusDetails & {
-        facilityId?: string;
+        facilityId?: FacilityId;
         statusLabel?: string;
         batteryPct?: number | null;
         alerts?: string[] | null;
@@ -47,16 +56,35 @@ export class VehicleManagementComponent {
 
   isSnapshotOpen = false;
 
+  // ---- Bay modal (custom, like your snapshot modal) ----
+  isBayModalOpen = false;
+  isBayModalVisible = false;
+
+  bayOptions: number[] = [];
+  baySelected: number | null = null;
+
+  pendingMove:
+    | { busId: string; fromCatId: CategoryId; toCatId: CategoryId; toIndex: number }
+    | null = null;
+
+  bayErrorMsg = '';
+
   constructor(private fleet: FleetService) {}
 
-  // placing images in: src/assets/
-  // and referencing them with /assets/...
+  // Bus silhouette image depends on selected facility (yard)
   getFacilityBusImageUrl(): string {
-    const map: Record<string, string> = {
-      facility_a: '/assets/york-region-transit-facility-a.png',
-      facility_b: '/assets/york-region-transit-facility-b.png',
+    const map: Record<FacilityId, string> = {
+      'Miller BRT': '/assets/york-region-transit_Miller-brt.png',
+      'Miller SE': '/assets/york-region-transit_Miller-se.png',
+      MOB1: '/assets/york-region-transit_mob1.png',
+      MOB2: '/assets/york-region-transit_mob2.png',
+      'TOK North': '/assets/york-region-transit_tok-north.png',
+      'TOK West': '/assets/york-region-transit_tok-west.png',
     };
-    return map[this.selectedFacilityId] ?? '/assets/york-region-transit-facility-a.png';
+
+    return (
+      map[this.selectedFacilityId] ?? '/assets/york-region-transit_Miller-brt.png'
+    );
   }
 
   // Board
@@ -65,7 +93,10 @@ export class VehicleManagementComponent {
   }
 
   get selectedFacility(): Facility {
-    return this.facilities.find((f) => f.id === this.selectedFacilityId) ?? this.facilities[0];
+    return (
+      this.facilities.find((f) => f.id === this.selectedFacilityId) ??
+      this.facilities[0]
+    );
   }
 
   get showSearchRow(): boolean {
@@ -89,12 +120,12 @@ export class VehicleManagementComponent {
     return this.board[categoryId].length;
   }
 
-  facilityTotal(facilityId: string): number {
+  facilityTotal(facilityId: FacilityId): number {
     const b = this.fleet.getBoard(facilityId);
     return this.categories.reduce((sum, c) => sum + b[c.id].length, 0);
   }
 
-  onSelectFacility(facilityId: string) {
+  onSelectFacility(facilityId: FacilityId) {
     this.selectedFacilityId = facilityId;
 
     this.searchQuery = '';
@@ -123,15 +154,23 @@ export class VehicleManagementComponent {
     }
 
     const results: BusDetails[] = [];
-    const meta: Record<string, { categoryId: CategoryId; categoryLabel: string } | undefined> = {};
+    const meta: Record<
+      string,
+      { categoryId: CategoryId; categoryLabel: string } | undefined
+    > = {};
 
     for (const cat of this.categories) {
       const list = this.board[cat.id];
+
       for (const bus of list) {
         const labelMatch = (bus.label ?? '').toLowerCase().includes(q);
-        const locMatch = String((bus as any).location ?? '').toLowerCase().includes(q);
 
-        if (labelMatch || locMatch) {
+        // match bay search: "bay 3" or "3"
+        const bayText = typeof bus.bay === 'number' ? `bay ${bus.bay}` : '';
+        const bayMatch =
+          bayText.includes(q) || String(bus.bay ?? '').includes(q);
+
+        if (labelMatch || bayMatch) {
           results.push(bus);
           meta[bus.id] = { categoryId: cat.id, categoryLabel: cat.label };
         }
@@ -149,42 +188,109 @@ export class VehicleManagementComponent {
     return null;
   }
 
-  onDrop(categoryId: CategoryId, event: CdkDragDrop<BusDetails[]>) {
+  onDrop(toCategory: CategoryId, event: CdkDragDrop<BusDetails[]>) {
+    // reorder in same column
     if (event.previousContainer === event.container) {
-      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+      moveItemInArray(
+        event.container.data,
+        event.previousIndex,
+        event.currentIndex
+      );
       return;
     }
 
     const movedBus = event.item.data as BusDetails;
 
-    // From SEARCH to real column
-    if (event.previousContainer.id === this.searchDropListId) {
-      const fromCat = this.findBusCategoryId(movedBus.id);
-      if (!fromCat) return;
+    // find original category (works both from search and normal columns)
+    const fromCategory = this.findBusCategoryId(movedBus.id);
+    if (!fromCategory) return;
 
-      const fromList = this.board[fromCat];
-      const toList = this.board[categoryId];
+    const movingIntoBayColumn =
+      toCategory === 'maintenance' || toCategory === 'long_term';
+    const hasBay = typeof movedBus.bay === 'number';
 
-      const idx = fromList.findIndex((b) => b.id === movedBus.id);
-      if (idx === -1) return;
-
-      const [busObj] = fromList.splice(idx, 1);
-      toList.splice(event.currentIndex, 0, busObj);
-
-      this.refreshSearch();
+    // If moving into Maintenance / Long-term and bay is missing -> open custom modal
+    if (movingIntoBayColumn && !hasBay) {
+      this.openBayModal(movedBus.id, fromCategory, toCategory, event.currentIndex);
       return;
     }
 
-    // Normal column-to-column
-    const prev = event.previousContainer.data;
-    const next = event.container.data;
-
-    const [busObj] = prev.splice(event.previousIndex, 1);
-    next.splice(event.currentIndex, 0, busObj);
+    // otherwise move immediately (service will clear bay when leaving bay columns)
+    // IMPORTANT: pass event.currentIndex so the bus is inserted where you dropped
+    this.fleet.moveBusCategory(
+      this.selectedFacilityId,
+      fromCategory,
+      toCategory,
+      movedBus.id,
+      undefined,
+      event.currentIndex
+    );
 
     if (this.showSearchRow) this.refreshSearch();
   }
 
+  // ---------- Bay Modal ----------
+  private openBayModal(
+    busId: string,
+    fromCatId: CategoryId,
+    toCatId: CategoryId,
+    toIndex: number
+  ) {
+    this.pendingMove = { busId, fromCatId, toCatId, toIndex };
+
+    // available bays excluding already-taken bays in maintenance+long_term
+    this.bayOptions = this.fleet.getAvailableBays(this.selectedFacilityId, busId);
+    this.baySelected = this.bayOptions.length ? this.bayOptions[0] : null;
+
+    this.bayErrorMsg = '';
+
+    this.isBayModalOpen = true;
+    requestAnimationFrame(() => (this.isBayModalVisible = true));
+  }
+
+  cancelBayModal() {
+    this.isBayModalVisible = false;
+
+    setTimeout(() => {
+      this.isBayModalOpen = false;
+      this.pendingMove = null;
+      this.bayOptions = [];
+      this.baySelected = null;
+      this.bayErrorMsg = '';
+    }, 200);
+  }
+
+  confirmBayModal() {
+    if (!this.pendingMove) return;
+
+    const bay = this.baySelected;
+    if (typeof bay !== 'number') {
+      this.bayErrorMsg = 'Please select a bay number.';
+      return;
+    }
+
+    const res = this.fleet.moveBusCategory(
+      this.selectedFacilityId,
+      this.pendingMove.fromCatId,
+      this.pendingMove.toCatId,
+      this.pendingMove.busId,
+      bay,
+      this.pendingMove.toIndex
+    );
+
+    if (!res.ok) {
+      if (res.reason === 'bay_taken') this.bayErrorMsg = 'That bay is already taken.';
+      else if (res.reason === 'bay_invalid')
+        this.bayErrorMsg = 'That bay is not allowed for this facility.';
+      else this.bayErrorMsg = 'Bay number is required.';
+      return;
+    }
+
+    if (this.showSearchRow) this.refreshSearch();
+    this.cancelBayModal();
+  }
+
+  // Snapshot modal
   openBusSnapshot(bus: BusDetails, statusLabel: string) {
     this.selectedBus = {
       ...bus,

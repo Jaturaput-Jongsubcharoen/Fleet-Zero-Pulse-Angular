@@ -6,8 +6,7 @@
 
   <div class="content-wrap">
     <div class="layout layout--vertical">
-
-      <!-- Facilities -->
+      <!-- Facilities (now: yards/locations) -->
       <section class="facilities-row">
         <div class="sidebar-card">
           <div class="sidebar-title">Facilities</div>
@@ -20,8 +19,10 @@
               (click)="onSelectFacility(f.id)"
               type="button"
             >
-              <div class="name">{{ f.name }}</div>
-              <div class="count">{{ facilityTotal(f.id) }}</div>
+              <div class="fac-left">
+                <div class="name">{{ f.name }}</div>
+                <div class="total">Total buses: {{ facilityTotal(f.id) }}</div>
+              </div>
             </button>
           </div>
 
@@ -30,7 +31,7 @@
             <input
               class="search-input"
               type="text"
-              placeholder="Search bus label or location (e.g., Bus 101, Miller, MOB1)..."
+              placeholder="Search bus label or bay (e.g., Bus 101, bay 3, 3)..."
               [(ngModel)]="searchQuery"
               (ngModelChange)="onSearchChange($event)"
             />
@@ -76,10 +77,7 @@
                 No buses match "{{ searchQuery }}".
               </div>
 
-              <div
-                class="search-item"
-                *ngFor="let bus of searchResults; trackBy: trackByBusId"
-              >
+              <div class="search-item" *ngFor="let bus of searchResults; trackBy: trackByBusId">
                 <div
                   class="bus bus--img bus--search"
                   cdkDrag
@@ -89,7 +87,10 @@
                 >
                   <div class="bus-top">
                     <div class="bus-badge">{{ bus.label }}</div>
-                    <div class="bus-loc">{{ bus.location }}</div>
+
+                    <div class="bus-loc" *ngIf="bus.bay != null">
+                      Bay {{ bus.bay }}
+                    </div>
                   </div>
 
                   <ng-template cdkDragPlaceholder>
@@ -104,7 +105,7 @@
                     >
                       <div class="bus-top">
                         <div class="bus-badge">{{ bus.label }}</div>
-                        <div class="bus-loc">{{ bus.location }}</div>
+                        <div class="bus-loc" *ngIf="bus.bay != null">Bay {{ bus.bay }}</div>
                       </div>
                     </div>
                   </ng-template>
@@ -151,7 +152,10 @@
                   >
                     <div class="bus-top">
                       <div class="bus-badge">{{ bus.label }}</div>
-                      <div class="bus-loc">{{ bus.location }}</div>
+
+                      <div class="bus-loc" *ngIf="bus.bay != null">
+                        Bay {{ bus.bay }}
+                      </div>
                     </div>
 
                     <ng-template cdkDragPlaceholder>
@@ -166,7 +170,7 @@
                       >
                         <div class="bus-top">
                           <div class="bus-badge">{{ bus.label }}</div>
-                          <div class="bus-loc">{{ bus.location }}</div>
+                          <div class="bus-loc" *ngIf="bus.bay != null">Bay {{ bus.bay }}</div>
                         </div>
                       </div>
                     </ng-template>
@@ -175,11 +179,48 @@
               </div>
             </div>
           </div>
-
         </section>
       </section>
     </div>
   </div>
+
+  <!-- Bay modal overlay -->
+  <div
+    class="bay-overlay"
+    *ngIf="isBayModalOpen"
+    [class.visible]="isBayModalVisible"
+    (click)="cancelBayModal()"
+  ></div>
+
+  <!-- Bay modal -->
+  <ng-container *ngIf="isBayModalOpen">
+    <div class="bay-modal" [class.visible]="isBayModalVisible" (click)="$event.stopPropagation()">
+      <div class="bay-modal-header">
+        <div class="bay-modal-title">Select Bay</div>
+        <button class="bay-x" type="button" (click)="cancelBayModal()">✕</button>
+      </div>
+
+      <div class="bay-modal-body">
+        <div class="bay-help">
+          Bay number is required to move into <b>Maintenance</b> / <b>Long-term Maintenance</b>.
+        </div>
+
+        <label class="bay-label">
+          Bay number
+          <select class="bay-select" [(ngModel)]="baySelected">
+            <option *ngFor="let b of bayOptions" [ngValue]="b">Bay {{ b }}</option>
+          </select>
+        </label>
+
+        <div class="bay-error" *ngIf="bayErrorMsg">{{ bayErrorMsg }}</div>
+      </div>
+
+      <div class="bay-modal-actions">
+        <button class="btn ghost" type="button" (click)="cancelBayModal()">Cancel</button>
+        <button class="btn primary" type="button" (click)="confirmBayModal()">Save</button>
+      </div>
+    </div>
+  </ng-container>
 
   <app-bus-snapshot
     *ngIf="isSnapshotOpen && selectedBus"

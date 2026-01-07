@@ -12,8 +12,15 @@
     <div class="bus-card" *ngFor="let bus of board()[c.id]">
       <div class="bus-left">
         <div class="bus-name">{{ bus.label }}</div>
-        <div class="bus-meta"><b>Location:</b> {{ bus.location }}</div>
+
+        <!-- no location anymore -->
+        <div class="bus-meta" *ngIf="bus.bay != null">
+          <b>Bay:</b> {{ bus.bay }}
+        </div>
+
+        <!-- status always matches the column -->
         <div class="bus-meta"><b>Status:</b> {{ c.label }}</div>
+
         <div class="bus-meta"><b>Last Service:</b> {{ bus.lastService || '--' }}</div>
         <div class="bus-meta"><b>Notes:</b> {{ bus.notes || '--' }}</div>
       </div>
@@ -48,9 +55,21 @@
           </select>
         </label>
 
+        <!-- show bay field ONLY for Maintenance / Long-term -->
+        <label *ngIf="e.toCatId === 'maintenance' || e.toCatId === 'long_term'">
+          Bay Number
+          <input
+            type="number"
+            min="1"
+            max="99"
+            placeholder="e.g., 3"
+            [(ngModel)]="e.bus.bay"
+          />
+        </label>
+
         <label>
           Last Service
-          <input type="date" [(ngModel)]="editing.bus.lastService"/>
+          <input type="date" [(ngModel)]="e.bus.lastService" />
         </label>
 
         <label>
