@@ -34,9 +34,11 @@ export class FleetService {
   }
 
   /**
-   * Move bus. If moving into maintenance/long_term, a bay must exist:
-   * - pass `bay` OR bus already has bay
-   * - bay must be allowed in facility + not taken
+   * Bay rules (UPDATED):
+   * - maintenance/long_term: bay REQUIRED + must be in FACILITY_BAYS + not taken
+   *   (bay uniqueness shared between maintenance + long_term)
+   * - all other columns (storage, in_service, out_of_service, third_party):
+   *   bay is NOT required, and should be removed when moving into them
    */
   moveBusCategory(
     facilityId: FacilityId,
@@ -56,59 +58,60 @@ export class FleetService {
 
     const [bus] = fromList.splice(idx, 1);
 
-    const movingIntoBayColumn = toCategory === 'maintenance' || toCategory === 'long_term';
+    const isInternalBayColumn = toCategory === 'maintenance' || toCategory === 'long_term';
 
-    if (movingIntoBayColumn) {
+    if (isInternalBayColumn) {
       const chosenBay = bay ?? bus.bay;
 
-      if (typeof chosenBay !== 'number') {
+      if (typeof chosenBay !== 'number' || !Number.isFinite(chosenBay)) {
         fromList.splice(idx, 0, bus);
         return { ok: false, reason: 'bay_required' };
       }
 
-      const allowed = FACILITY_BAYS[facilityId] ?? [];
-      if (!allowed.includes(chosenBay)) {
+      const normalizedBay = Math.trunc(chosenBay);
+
+      if (normalizedBay <= 0) {
         fromList.splice(idx, 0, bus);
         return { ok: false, reason: 'bay_invalid' };
       }
 
-      const taken = this.getTakenBays(facilityId, bus.id);
-      if (taken.has(chosenBay)) {
+      const allowed = FACILITY_BAYS[facilityId] ?? [];
+      if (!allowed.includes(normalizedBay)) {
+        fromList.splice(idx, 0, bus);
+        return { ok: false, reason: 'bay_invalid' };
+      }
+
+      const taken = this.getTakenBaysInternal(facilityId, bus.id);
+      if (taken.has(normalizedBay)) {
         fromList.splice(idx, 0, bus);
         return { ok: false, reason: 'bay_taken' };
       }
 
-      bus.bay = chosenBay;
+      bus.bay = normalizedBay;
     } else {
-      // leaving Maintenance/Long-term -> remove bay
+      // moving into non-bay columns (including third_party) => remove bay
       delete bus.bay;
     }
 
-    // insert at the drop position (NOT unshift)
+    // insert at drop position
     const safeIndex =
       typeof toIndex === 'number'
         ? Math.max(0, Math.min(toIndex, toList.length))
-        : toList.length; // default: bottom
+        : toList.length;
 
     toList.splice(safeIndex, 0, bus);
-
     return { ok: true };
   }
 
-
-  /**
-   * Available bays for the facility (excluding bays already used
-   * in maintenance + long_term). You can allow duplicates by changing this rule.
-   */
+  // Only for internal bay columns (maintenance + long_term)
   getAvailableBays(facilityId: FacilityId, excludeBusId?: string): number[] {
     const allowed = FACILITY_BAYS[facilityId] ?? [];
-    const taken = this.getTakenBays(facilityId, excludeBusId);
+    const taken = this.getTakenBaysInternal(facilityId, excludeBusId);
     return allowed.filter((b) => !taken.has(b));
   }
 
-  private getTakenBays(facilityId: FacilityId, excludeBusId?: string): Set<number> {
+  private getTakenBaysInternal(facilityId: FacilityId, excludeBusId?: string): Set<number> {
     const used = new Set<number>();
-
     const b = this.boards[facilityId];
 
     for (const cat of ['maintenance', 'long_term'] as const) {
@@ -117,7 +120,6 @@ export class FleetService {
         if (typeof bus.bay === 'number') used.add(bus.bay);
       }
     }
-
     return used;
   }
 }

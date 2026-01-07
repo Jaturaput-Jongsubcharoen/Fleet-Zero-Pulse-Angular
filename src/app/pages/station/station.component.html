@@ -6,26 +6,25 @@
 
   <section class="section" *ngFor="let c of categories">
     <div class="section-title">
-      {{ c.label }} ({{ board()[c.id].length }} buses)
+      {{ c.label }} ({{ board[c.id].length }} buses)
     </div>
 
-    <div class="bus-card" *ngFor="let bus of board()[c.id]">
+    <div class="bus-card" *ngFor="let bus of board[c.id]">
       <div class="bus-left">
         <div class="bus-name">{{ bus.label }}</div>
 
-        <!-- no location anymore -->
-        <div class="bus-meta" *ngIf="bus.bay != null">
+        <div class="bus-meta" *ngIf="bus.bay != null && c.id !== 'third_party'">
           <b>Bay:</b> {{ bus.bay }}
         </div>
 
-        <!-- status always matches the column -->
         <div class="bus-meta"><b>Status:</b> {{ c.label }}</div>
-
         <div class="bus-meta"><b>Last Service:</b> {{ bus.lastService || '--' }}</div>
         <div class="bus-meta"><b>Notes:</b> {{ bus.notes || '--' }}</div>
       </div>
 
-      <button class="edit-btn" type="button" (click)="startEdit(c.id, bus)">Edit</button>
+      <button class="edit-btn" type="button" (click)="startEdit(c.id, bus)">
+        Edit
+      </button>
     </div>
   </section>
 
@@ -48,23 +47,22 @@
       <div class="sheet-body">
         <label>
           Status (Category)
-          <select [(ngModel)]="e.toCatId">
+          <select [(ngModel)]="e.toCatId" (ngModelChange)="onEditCategoryChange()">
             <option *ngFor="let c of categories" [ngValue]="c.id">
               {{ c.label }}
             </option>
           </select>
         </label>
 
-        <!-- show bay field ONLY for Maintenance / Long-term -->
+        <!-- Maintenance / Long-term -> dropdown (facility bays, excluding taken) -->
         <label *ngIf="e.toCatId === 'maintenance' || e.toCatId === 'long_term'">
           Bay Number
-          <input
-            type="number"
-            min="1"
-            max="99"
-            placeholder="e.g., 3"
-            [(ngModel)]="e.bus.bay"
-          />
+          <select [(ngModel)]="e.bus.bay">
+            <option [ngValue]="undefined" disabled>Select bay...</option>
+            <option *ngFor="let b of bayOptions" [ngValue]="b">Bay {{ b }}</option>
+          </select>
+
+          <div class="sheet-error" *ngIf="editErrorMsg">{{ editErrorMsg }}</div>
         </label>
 
         <label>

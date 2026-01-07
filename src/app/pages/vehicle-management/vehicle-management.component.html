@@ -88,7 +88,11 @@
                   <div class="bus-top">
                     <div class="bus-badge">{{ bus.label }}</div>
 
-                    <div class="bus-loc" *ngIf="bus.bay != null">
+                    <!-- Hide bay display when bus is currently in 3rd Party -->
+                    <div
+                      class="bus-loc"
+                      *ngIf="bus.bay != null && searchMetaById[bus.id]?.categoryId !== 'third_party'"
+                    >
                       Bay {{ bus.bay }}
                     </div>
                   </div>
@@ -105,7 +109,14 @@
                     >
                       <div class="bus-top">
                         <div class="bus-badge">{{ bus.label }}</div>
-                        <div class="bus-loc" *ngIf="bus.bay != null">Bay {{ bus.bay }}</div>
+
+                        <!-- Hide bay display when bus is currently in 3rd Party -->
+                        <div
+                          class="bus-loc"
+                          *ngIf="bus.bay != null && searchMetaById[bus.id]?.categoryId !== 'third_party'"
+                        >
+                          Bay {{ bus.bay }}
+                        </div>
                       </div>
                     </div>
                   </ng-template>
@@ -125,7 +136,7 @@
           <!-- Columns -->
           <div class="columns">
             <div class="col" *ngFor="let c of categories; trackBy: trackByCategoryId">
-              <div class="col-card">
+              <div class="col-card" [class.col-card--third-party]="c.id === 'third_party'">
                 <div class="col-header">
                   <span class="col-name">{{ c.label }}</span>
                 </div>
@@ -153,7 +164,8 @@
                     <div class="bus-top">
                       <div class="bus-badge">{{ bus.label }}</div>
 
-                      <div class="bus-loc" *ngIf="bus.bay != null">
+                      <!-- Hide bay display in 3rd Party column -->
+                      <div class="bus-loc" *ngIf="bus.bay != null && c.id !== 'third_party'">
                         Bay {{ bus.bay }}
                       </div>
                     </div>
@@ -170,7 +182,11 @@
                       >
                         <div class="bus-top">
                           <div class="bus-badge">{{ bus.label }}</div>
-                          <div class="bus-loc" *ngIf="bus.bay != null">Bay {{ bus.bay }}</div>
+
+                          <!-- Hide bay display in 3rd Party column -->
+                          <div class="bus-loc" *ngIf="bus.bay != null && c.id !== 'third_party'">
+                            Bay {{ bus.bay }}
+                          </div>
                         </div>
                       </div>
                     </ng-template>
@@ -202,11 +218,14 @@
 
       <div class="bay-modal-body">
         <div class="bay-help">
-          Bay number is required to move into <b>Maintenance</b> / <b>Long-term Maintenance</b>.
+          Bay number is required to move into
+          <b>Maintenance</b> or <b>Long-term Maintenance</b>.
         </div>
 
         <label class="bay-label">
           Bay number
+
+          <!-- Internal maintenance/long_term: select -->
           <select class="bay-select" [(ngModel)]="baySelected">
             <option *ngFor="let b of bayOptions" [ngValue]="b">Bay {{ b }}</option>
           </select>
