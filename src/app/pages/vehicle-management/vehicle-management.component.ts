@@ -14,7 +14,7 @@ type Facility = { id: string; name: string };
   standalone: true,
   imports: [CommonModule, DragDropModule, FormsModule, BusSnapshotComponent],
   templateUrl: './vehicle-management.component.html',
-  styleUrls: ['./vehicle-management.component.scss'],
+  styleUrl: './vehicle-management.component.scss',
 })
 export class VehicleManagementComponent {
   title = 'Fleet Zero Pulse';
@@ -28,7 +28,12 @@ export class VehicleManagementComponent {
   // Search
   searchQuery = '';
   searchResults: BusDetails[] = [];
-  searchMetaById: Record<string, { categoryId: CategoryId; categoryLabel: string }> = {};
+
+  // allow undefined so ?. is valid and warning disappears
+  searchMetaById: Record<
+    string,
+    { categoryId: CategoryId; categoryLabel: string } | undefined
+  > = {};
 
   // Snapshot modal
   selectedBus:
@@ -44,13 +49,14 @@ export class VehicleManagementComponent {
 
   constructor(private fleet: FleetService) {}
 
-  // Facility-based image
+  // placing images in: src/assets/
+  // and referencing them with /assets/...
   getFacilityBusImageUrl(): string {
     const map: Record<string, string> = {
-      facility_a: '/york-region-transit-facility-a.png',
-      facility_b: '/york-region-transit-facility-b.png',
+      facility_a: '/assets/york-region-transit-facility-a.png',
+      facility_b: '/assets/york-region-transit-facility-b.png',
     };
-    return map[this.selectedFacilityId] ?? '/york-region-transit-facility-a.png';
+    return map[this.selectedFacilityId] ?? '/assets/york-region-transit-facility-a.png';
   }
 
   // Board
@@ -59,20 +65,17 @@ export class VehicleManagementComponent {
   }
 
   get selectedFacility(): Facility {
-    return this.facilities.find((f) => f.id === this.selectedFacilityId)!;
+    return this.facilities.find((f) => f.id === this.selectedFacilityId) ?? this.facilities[0];
   }
 
-  // Search row visibility
   get showSearchRow(): boolean {
     return this.searchQuery.trim().length > 0;
   }
 
-  // Search drop list id (unique per facility)
   get searchDropListId(): string {
     return `search__${this.selectedFacilityId}`;
   }
 
-  // Connect columns to each other, PLUS search list when searching (so columns can accept drag from search)
   get connectedDropListIds(): string[] {
     const colIds = this.categories.map((c) => this.dropListId(c.id));
     return this.showSearchRow ? [...colIds, this.searchDropListId] : colIds;
@@ -94,13 +97,11 @@ export class VehicleManagementComponent {
   onSelectFacility(facilityId: string) {
     this.selectedFacilityId = facilityId;
 
-    // optional: reset search on facility switch
     this.searchQuery = '';
     this.searchResults = [];
     this.searchMetaById = {};
   }
 
-  // Called when user types
   onSearchChange(value: string) {
     this.searchQuery = value;
     this.refreshSearch();
@@ -122,12 +123,12 @@ export class VehicleManagementComponent {
     }
 
     const results: BusDetails[] = [];
-    const meta: Record<string, { categoryId: CategoryId; categoryLabel: string }> = {};
+    const meta: Record<string, { categoryId: CategoryId; categoryLabel: string } | undefined> = {};
 
     for (const cat of this.categories) {
       const list = this.board[cat.id];
       for (const bus of list) {
-        const labelMatch = bus.label?.toLowerCase().includes(q);
+        const labelMatch = (bus.label ?? '').toLowerCase().includes(q);
         const locMatch = String((bus as any).location ?? '').toLowerCase().includes(q);
 
         if (labelMatch || locMatch) {
@@ -148,9 +149,7 @@ export class VehicleManagementComponent {
     return null;
   }
 
-  // Drag drop handler for columns
   onDrop(categoryId: CategoryId, event: CdkDragDrop<BusDetails[]>) {
-    // same column reorder
     if (event.previousContainer === event.container) {
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
       return;
@@ -158,7 +157,7 @@ export class VehicleManagementComponent {
 
     const movedBus = event.item.data as BusDetails;
 
-    // From SEARCH to Real column
+    // From SEARCH to real column
     if (event.previousContainer.id === this.searchDropListId) {
       const fromCat = this.findBusCategoryId(movedBus.id);
       if (!fromCat) return;
@@ -172,12 +171,11 @@ export class VehicleManagementComponent {
       const [busObj] = fromList.splice(idx, 1);
       toList.splice(event.currentIndex, 0, busObj);
 
-      // refresh search list/meta
       this.refreshSearch();
       return;
     }
 
-    // Normal column to column move
+    // Normal column-to-column
     const prev = event.previousContainer.data;
     const next = event.container.data;
 

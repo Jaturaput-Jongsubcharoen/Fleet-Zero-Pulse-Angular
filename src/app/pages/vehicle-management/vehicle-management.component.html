@@ -70,7 +70,7 @@
               [id]="searchDropListId"
               [cdkDropListData]="searchResults"
               [cdkDropListConnectedTo]="connectedDropListIds"
-              cdkDropListSortingDisabled="true"
+              [cdkDropListSortingDisabled]="true"
             >
               <div class="search-empty" *ngIf="searchResults.length === 0">
                 No buses match "{{ searchQuery }}".
@@ -100,7 +100,7 @@
                     <div
                       class="bus bus--img bus--preview"
                       [style.background-image]="'url(' + getFacilityBusImageUrl() + ')'"
-                      
+                      style="background-size: cover; background-position: center;"
                     >
                       <div class="bus-top">
                         <div class="bus-badge">{{ bus.label }}</div>
@@ -110,7 +110,7 @@
                   </ng-template>
                 </div>
 
-                <!-- BELOW the bus silhouette (NOT inside it) -->
+                <!-- BELOW the bus silhouette -->
                 <div class="search-meta">
                   <span class="search-meta-label">In:</span>
                   <span class="search-meta-value">
@@ -118,8 +118,6 @@
                   </span>
                 </div>
               </div>
-
-
             </div>
           </div>
 
@@ -129,12 +127,10 @@
               <div class="col-card">
                 <div class="col-header">
                   <span class="col-name">{{ c.label }}</span>
-                  
                 </div>
                 <div class="col-header">
                   <span class="col-count">({{ count(c.id) }} buses)</span>
                 </div>
-                
 
                 <div
                   class="dropzone"
@@ -176,7 +172,6 @@
                     </ng-template>
                   </div>
                 </div>
-
               </div>
             </div>
           </div>
