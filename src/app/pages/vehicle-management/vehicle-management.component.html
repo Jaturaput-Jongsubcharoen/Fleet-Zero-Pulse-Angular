@@ -60,24 +60,50 @@
                     cdkDrag
                     (dblclick)="openBusSnapshot(bus, c.label)"
                   >
+                    <!--
                     <div class="grip" aria-hidden="true">
                       <span>•</span><span>•</span>
                       <span>•</span><span>•</span>
                     </div>
-                    <div class="bus-label">{{ bus.label }}</div>
-
+                    -->
+                    <div class="bus-vehicle">
+                      <div class="bus-front"></div>
+                      <div class="bus-body">
+                        <div class="bus-number">{{ bus.label }}</div>
+                        <div class="bus-windows">
+                          <span></span><span></span><span></span>
+                        </div>
+                      </div>
+                      <div class="bus-wheel left"></div>
+                      <div class="bus-wheel right"></div>
+                    </div>
+                    
                     <ng-template cdkDragPlaceholder>
                       <div class="bus bus--placeholder"></div>
                     </ng-template>
 
                     <ng-template cdkDragPreview>
+                      
                       <div class="bus bus--preview">
+                        <!--
                         <div class="grip" aria-hidden="true">
                           <span>•</span><span>•</span>
                           <span>•</span><span>•</span>
                         </div>
-                        <div class="bus-label">{{ bus.label }}</div>
+                        -->
+                                            <div class="bus-vehicle">
+                      <div class="bus-front"></div>
+                      <div class="bus-body">
+                        <div class="bus-number">{{ bus.label }}</div>
+                        <div class="bus-windows">
+                          <span></span><span></span><span></span>
+                        </div>
                       </div>
+                      <div class="bus-wheel left"></div>
+                      <div class="bus-wheel right"></div>
+                    </div>
+                      </div>
+                      
                     </ng-template>
                   </div>
                 </div>
