@@ -12,19 +12,40 @@
           <div class="sidebar-title">Facilities</div>
 
           <div class="fac-items">
-            <button
-              class="fac-item"
-              *ngFor="let f of facilities; trackBy: trackByFacilityId"
-              [class.active]="f.id === selectedFacilityId"
-              (click)="onSelectFacility(f.id)"
-              type="button"
-            >
-              <div class="fac-left">
-                <div class="name">{{ f.name }}</div>
-                <div class="total">Total buses: {{ facilityTotal(f.id) }}</div>
+            <!-- LEFT: All Facilities (separate column) -->
+            <div class="fac-col-all">
+              <button
+                class="fac-item fac-item--all"
+                [class.active]="selectedFacilityId === ALL_FACILITIES_ID"
+                (click)="onSelectAllFacilities()"
+                type="button"
+              >
+                <div class="fac-left">
+                  <div class="name">All Facilities</div>
+                  <div class="total">Total buses: {{ allFacilitiesTotal() }}</div>
+                </div>
+              </button>
+            </div>
+
+            <!-- RIGHT: facilities list (scrollable row) -->
+            <div class="fac-col-list">
+              <div class="fac-scroll">
+                <button
+                  class="fac-item"
+                  *ngFor="let f of facilities; trackBy: trackByFacilityId"
+                  [class.active]="f.id === selectedFacilityId"
+                  (click)="onSelectFacility(f.id)"
+                  type="button"
+                >
+                  <div class="fac-left">
+                    <div class="name">{{ f.name }}</div>
+                    <div class="total">Total buses: {{ facilityTotal(f.id) }}</div>
+                  </div>
+                </button>
               </div>
-            </button>
+            </div>
           </div>
+
 
           <!-- Search bar under Facilities -->
           <div class="search-wrap">
@@ -54,14 +75,14 @@
       <!-- Board -->
       <section class="board-row">
         <section class="board-shell">
-          <div class="board-title">{{ selectedFacility.name }}</div>
+          <div class="board-title">{{ selectedFacilityLabel }}</div>
 
           <!-- Search results row (only when searching) -->
           <div class="search-panel" *ngIf="showSearchRow">
             <div class="search-panel-header">
               <div class="search-title">Search Results</div>
               <div class="search-sub">
-                Matches in {{ selectedFacility.name }} (drag into columns)
+                Matches in {{ selectedFacilityLabel }} (drag into columns)
               </div>
             </div>
 
@@ -88,7 +109,7 @@
                   <div class="bus-top">
                     <div class="bus-badge">{{ bus.label }}</div>
 
-                    <!-- Hide bay display when bus is currently in 3rd Party -->
+                    <!-- Hide bay display when bus is currently in off-site(third_party) -->
                     <div
                       class="bus-loc"
                       *ngIf="bus.bay != null && searchMetaById[bus.id]?.categoryId !== 'third_party'"
@@ -110,7 +131,6 @@
                       <div class="bus-top">
                         <div class="bus-badge">{{ bus.label }}</div>
 
-                        <!-- Hide bay display when bus is currently in 3rd Party -->
                         <div
                           class="bus-loc"
                           *ngIf="bus.bay != null && searchMetaById[bus.id]?.categoryId !== 'third_party'"
@@ -122,7 +142,6 @@
                   </ng-template>
                 </div>
 
-                <!-- BELOW the bus silhouette -->
                 <div class="search-meta">
                   <span class="search-meta-label">In:</span>
                   <span class="search-meta-value">
@@ -164,7 +183,7 @@
                     <div class="bus-top">
                       <div class="bus-badge">{{ bus.label }}</div>
 
-                      <!-- Hide bay display in 3rd Party column -->
+                      <!-- Hide bay display in off-site(third_party) column -->
                       <div class="bus-loc" *ngIf="bus.bay != null && c.id !== 'third_party'">
                         Bay {{ bus.bay }}
                       </div>
@@ -183,7 +202,6 @@
                         <div class="bus-top">
                           <div class="bus-badge">{{ bus.label }}</div>
 
-                          <!-- Hide bay display in 3rd Party column -->
                           <div class="bus-loc" *ngIf="bus.bay != null && c.id !== 'third_party'">
                             Bay {{ bus.bay }}
                           </div>
@@ -224,8 +242,6 @@
 
         <label class="bay-label">
           Bay number
-
-          <!-- Internal maintenance/long_term: select -->
           <select class="bay-select" [(ngModel)]="baySelected">
             <option *ngFor="let b of bayOptions" [ngValue]="b">Bay {{ b }}</option>
           </select>

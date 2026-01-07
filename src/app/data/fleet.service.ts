@@ -20,6 +20,29 @@ export class FleetService {
     return this.boards[facilityId];
   }
 
+  // ✅ merge multiple facilities into one board (READ-ONLY view)
+  getMergedBoard(facilityIds: FacilityId[]): Board {
+    const empty: Board = {
+      maintenance: [],
+      long_term: [],
+      third_party: [],
+      storage: [],
+      in_service: [],
+      out_of_service: [],
+    };
+
+    for (const fid of facilityIds) {
+      const b = this.boards[fid];
+
+      // IMPORTANT: clone bus objects so drag preview/search doesn't mutate originals
+      for (const cat of Object.keys(empty) as CategoryId[]) {
+        empty[cat].push(...b[cat].map((x) => ({ ...x })));
+      }
+    }
+
+    return empty;
+  }
+
   updateBus(
     facilityId: FacilityId,
     categoryId: CategoryId,
@@ -89,11 +112,10 @@ export class FleetService {
 
       bus.bay = normalizedBay;
     } else {
-      // moving into non-bay columns (including third_party) => remove bay
+      // moving into non-bay columns (including off-site) => remove bay
       delete bus.bay;
     }
 
-    // insert at drop position
     const safeIndex =
       typeof toIndex === 'number'
         ? Math.max(0, Math.min(toIndex, toList.length))

@@ -503,6 +503,55 @@
 
 
 
+
+
+
+.fac-items {
+  display: grid;
+  grid-template-columns: 210px 1fr; /* left fixed, right flexible */
+  gap: 12px;
+  align-items: start;
+}
+
+.fac-col-all {
+  /* left column stays fixed */
+}
+
+.fac-col-list {
+  min-width: 0; /* IMPORTANT: allows the scroll container to shrink */
+}
+
+.fac-scroll {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 6px; /* space for scrollbar */
+  -webkit-overflow-scrolling: touch;
+  scrollbar-gutter: stable;
+
+  /* optional: makes scrolling feel nicer */
+  scroll-snap-type: x mandatory;
+}
+
+.fac-scroll .fac-item {
+  flex: 0 0 auto; /* keep each button from shrinking */
+  scroll-snap-align: start;
+}
+
+/* optional: make the All button visually “special” */
+.fac-item--all {
+  width: 100%;
+}
+
+
+
+
+
+
+
+
+
+
 /* -------- Responsive board layout -------- */
 @media (max-width: 1300px) {
   .columns {
@@ -531,6 +580,14 @@
   }
 }
 
+@media (max-width: 720px) {
+  .fac-items {
+    grid-template-columns: 1fr;
+  }
+  .fac-item--all {
+    width: 100%;
+  }
+}
 /*------------------------*/
 
 /* Top row inside the bus image card (label + location) */

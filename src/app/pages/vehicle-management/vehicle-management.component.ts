@@ -1,15 +1,28 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
+import {
+  CdkDragDrop,
+  DragDropModule,
+  moveItemInArray,
+} from '@angular/cdk/drag-drop';
 import { FormsModule } from '@angular/forms';
 
 import { BusSnapshotComponent } from '../../components/bus-snapshot/bus-snapshot.component';
-import { CATEGORIES, FACILITIES, CategoryId, Board, BusDetails, FacilityId } from '../../data/fleet-store';
+import {
+  CATEGORIES,
+  FACILITIES,
+  CategoryId,
+  Board,
+  BusDetails,
+  FacilityId,
+} from '../../data/fleet-store';
 import { FleetService } from '../../data/fleet.service';
 
 type Facility = { id: FacilityId; name: string };
-
 type BayModalMode = 'internal_select';
+
+// special id for “All facilities” view
+type SelectedId = FacilityId | '__ALL__';
 
 @Component({
   selector: 'app-vehicle-management',
@@ -25,12 +38,18 @@ export class VehicleManagementComponent {
   readonly facilities = FACILITIES;
   categories = CATEGORIES;
 
-  selectedFacilityId: FacilityId = this.facilities[0].id;
+  readonly ALL_FACILITIES_ID: SelectedId = '__ALL__';
+
+  // default = All Facilities
+  selectedFacilityId: SelectedId = this.ALL_FACILITIES_ID;
 
   // Search
   searchQuery = '';
   searchResults: BusDetails[] = [];
-  searchMetaById: Record<string, { categoryId: CategoryId; categoryLabel: string } | undefined> = {};
+  searchMetaById: Record<
+    string,
+    { categoryId: CategoryId; categoryLabel: string } | undefined
+  > = {};
 
   // Snapshot modal
   selectedBus:
@@ -50,19 +69,43 @@ export class VehicleManagementComponent {
 
   bayModalMode: BayModalMode = 'internal_select';
 
-  // internal select
   bayOptions: number[] = [];
   baySelected: number | null = null;
 
   pendingMove:
-    | { busId: string; fromCatId: CategoryId; toCatId: CategoryId; toIndex: number }
+    | {
+        busId: string;
+        fromCatId: CategoryId;
+        toCatId: CategoryId;
+        toIndex: number;
+        fromFacilityId: FacilityId;
+      }
     | null = null;
 
   bayErrorMsg = '';
 
   constructor(private fleet: FleetService) {}
 
-  // Bus silhouette image depends on selected facility (yard)
+  // type guard: narrows SelectedId -> '__ALL__'
+  private isAllSelected(id: SelectedId): id is '__ALL__' {
+    return id === this.ALL_FACILITIES_ID;
+  }
+
+  // whenever you need a single FacilityId (image, label fallback, etc.)
+  private get resolvedFacilityId(): FacilityId {
+    return this.isAllSelected(this.selectedFacilityId)
+      ? 'Miller BRT'
+      : this.selectedFacilityId;
+  }
+
+  // label for board title
+  get selectedFacilityLabel(): string {
+    return this.isAllSelected(this.selectedFacilityId)
+      ? 'All Facilities'
+      : this.selectedFacility.name;
+  }
+
+  // Bus silhouette image (in All view pick a default)
   getFacilityBusImageUrl(): string {
     const map: Record<FacilityId, string> = {
       'Miller BRT': '/assets/york-region-transit_Miller-brt.png',
@@ -72,16 +115,26 @@ export class VehicleManagementComponent {
       'TOK North': '/assets/york-region-transit_tok-north.png',
       'TOK West': '/assets/york-region-transit_tok-west.png',
     };
-    return map[this.selectedFacilityId] ?? '/assets/york-region-transit_Miller-brt.png';
+
+    return map[this.resolvedFacilityId] ?? map['Miller BRT'];
   }
 
-  // Board
+  // Board (either single facility OR merged)
   get board(): Board {
-    return this.fleet.getBoard(this.selectedFacilityId);
+    if (this.isAllSelected(this.selectedFacilityId)) {
+      return this.fleet.getMergedBoard(this.facilities.map((f) => f.id));
+    }
+    return this.fleet.getBoard(this.selectedFacilityId); // narrowed by guard
   }
 
   get selectedFacility(): Facility {
-    return this.facilities.find((f) => f.id === this.selectedFacilityId) ?? this.facilities[0];
+    if (this.isAllSelected(this.selectedFacilityId)) {
+      return { id: this.resolvedFacilityId, name: 'All Facilities' };
+    }
+    return (
+      this.facilities.find((f) => f.id === this.selectedFacilityId) ??
+      this.facilities[0]
+    );
   }
 
   get showSearchRow(): boolean {
@@ -89,7 +142,10 @@ export class VehicleManagementComponent {
   }
 
   get searchDropListId(): string {
-    return `search__${this.selectedFacilityId}`;
+    const scope = this.isAllSelected(this.selectedFacilityId)
+      ? 'ALL'
+      : this.selectedFacilityId;
+    return `search__${scope}`;
   }
 
   get connectedDropListIds(): string[] {
@@ -98,7 +154,10 @@ export class VehicleManagementComponent {
   }
 
   dropListId(categoryId: CategoryId): string {
-    return `${this.selectedFacilityId}__${categoryId}`;
+    const scope = this.isAllSelected(this.selectedFacilityId)
+      ? 'ALL'
+      : this.selectedFacilityId;
+    return `${scope}__${categoryId}`;
   }
 
   count(categoryId: CategoryId): number {
@@ -108,6 +167,20 @@ export class VehicleManagementComponent {
   facilityTotal(facilityId: FacilityId): number {
     const b = this.fleet.getBoard(facilityId);
     return this.categories.reduce((sum, c) => sum + b[c.id].length, 0);
+  }
+
+  allFacilitiesTotal(): number {
+    return this.facilities.reduce(
+      (sum, f) => sum + this.facilityTotal(f.id),
+      0
+    );
+  }
+
+  onSelectAllFacilities() {
+    this.selectedFacilityId = this.ALL_FACILITIES_ID;
+    this.searchQuery = '';
+    this.searchResults = [];
+    this.searchMetaById = {};
   }
 
   onSelectFacility(facilityId: FacilityId) {
@@ -137,16 +210,18 @@ export class VehicleManagementComponent {
     }
 
     const results: BusDetails[] = [];
-    const meta: Record<string, { categoryId: CategoryId; categoryLabel: string } | undefined> = {};
+    const meta: Record<
+      string,
+      { categoryId: CategoryId; categoryLabel: string } | undefined
+    > = {};
 
+    // Search in CURRENT board (single or merged)
     for (const cat of this.categories) {
       const list = this.board[cat.id];
 
       for (const bus of list) {
         const labelMatch = (bus.label ?? '').toLowerCase().includes(q);
 
-        // NOTE: we still allow searching by bay if a bus happens to have bay in data,
-        // but UI will not display bay in third_party (handled in HTML).
         const bayText = typeof bus.bay === 'number' ? `bay ${bus.bay}` : '';
         const bayMatch = bayText.includes(q) || String(bus.bay ?? '').includes(q);
 
@@ -168,31 +243,63 @@ export class VehicleManagementComponent {
     return null;
   }
 
+  // In All Facilities view, a bus id might exist in multiple facilities.
+  // Find which facility owns that bus.
+  private findBusFacilityId(busId: string): FacilityId | null {
+    for (const f of this.facilities) {
+      const b = this.fleet.getBoard(f.id);
+      for (const cat of this.categories) {
+        if (b[cat.id].some((x) => x.id === busId)) return f.id;
+      }
+    }
+    return null;
+  }
+
   onDrop(toCategory: CategoryId, event: CdkDragDrop<BusDetails[]>) {
     // reorder in same column
     if (event.previousContainer === event.container) {
-      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+      moveItemInArray(
+        event.container.data,
+        event.previousIndex,
+        event.currentIndex
+      );
       return;
     }
 
     const movedBus = event.item.data as BusDetails;
 
-    // find original category (works for search and normal columns)
+    // fromCategory in current view
     const fromCategory = this.findBusCategoryId(movedBus.id);
     if (!fromCategory) return;
 
-    // Only Maintenance / Long-term require bay modal
-    const movingIntoInternalBay = toCategory === 'maintenance' || toCategory === 'long_term';
+    // determine which facility this bus belongs to
+    let fromFacilityId: FacilityId | null;
+
+    if (this.isAllSelected(this.selectedFacilityId)) {
+      fromFacilityId = this.findBusFacilityId(movedBus.id);
+    } else {
+      fromFacilityId = this.selectedFacilityId; // narrowed
+    }
+
+    if (!fromFacilityId) return;
+
+    const movingIntoInternalBay =
+      toCategory === 'maintenance' || toCategory === 'long_term';
     const hasBay = typeof movedBus.bay === 'number';
 
     if (movingIntoInternalBay && !hasBay) {
-      this.openBayModalInternalSelect(movedBus.id, fromCategory, toCategory, event.currentIndex);
+      this.openBayModalInternalSelect(
+        movedBus.id,
+        fromCategory,
+        toCategory,
+        event.currentIndex,
+        fromFacilityId
+      );
       return;
     }
 
-    // move immediately
     this.fleet.moveBusCategory(
-      this.selectedFacilityId,
+      fromFacilityId,
       fromCategory,
       toCategory,
       movedBus.id,
@@ -208,12 +315,13 @@ export class VehicleManagementComponent {
     busId: string,
     fromCatId: CategoryId,
     toCatId: CategoryId,
-    toIndex: number
+    toIndex: number,
+    fromFacilityId: FacilityId
   ) {
-    this.pendingMove = { busId, fromCatId, toCatId, toIndex };
+    this.pendingMove = { busId, fromCatId, toCatId, toIndex, fromFacilityId };
     this.bayModalMode = 'internal_select';
 
-    this.bayOptions = this.fleet.getAvailableBays(this.selectedFacilityId, busId);
+    this.bayOptions = this.fleet.getAvailableBays(fromFacilityId, busId);
     this.baySelected = this.bayOptions.length ? this.bayOptions[0] : null;
 
     this.bayErrorMsg = '';
@@ -248,7 +356,7 @@ export class VehicleManagementComponent {
     }
 
     const res = this.fleet.moveBusCategory(
-      this.selectedFacilityId,
+      this.pendingMove.fromFacilityId,
       this.pendingMove.fromCatId,
       this.pendingMove.toCatId,
       this.pendingMove.busId,
@@ -269,9 +377,15 @@ export class VehicleManagementComponent {
 
   // Snapshot modal
   openBusSnapshot(bus: BusDetails, statusLabel: string) {
+    const resolvedFacilityId: FacilityId | undefined = this.isAllSelected(
+      this.selectedFacilityId
+    )
+      ? this.findBusFacilityId(bus.id) ?? undefined
+      : this.selectedFacilityId;
+
     this.selectedBus = {
       ...bus,
-      facilityId: this.selectedFacilityId,
+      facilityId: resolvedFacilityId,
       statusLabel,
       batteryPct: null,
       alerts: [],
