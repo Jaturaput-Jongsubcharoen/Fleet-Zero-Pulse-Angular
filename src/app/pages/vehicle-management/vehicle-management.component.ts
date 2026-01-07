@@ -1,15 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import {
-  CdkDragDrop,
-  DragDropModule,
-  moveItemInArray,
-  transferArrayItem,
-} from '@angular/cdk/drag-drop';
+import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
+import { FormsModule } from '@angular/forms';
 
 import { BusSnapshotComponent } from '../../components/bus-snapshot/bus-snapshot.component';
-
-// shared data + types
 import { CATEGORIES, FACILITIES, CategoryId, Board, BusDetails } from '../../data/fleet-store';
 import { FleetService } from '../../data/fleet.service';
 
@@ -18,9 +12,9 @@ type Facility = { id: string; name: string };
 @Component({
   selector: 'app-vehicle-management',
   standalone: true,
-  imports: [CommonModule, DragDropModule, BusSnapshotComponent],
+  imports: [CommonModule, DragDropModule, FormsModule, BusSnapshotComponent],
   templateUrl: './vehicle-management.component.html',
-  styleUrl: './vehicle-management.component.scss',
+  styleUrls: ['./vehicle-management.component.scss'],
 })
 export class VehicleManagementComponent {
   title = 'Fleet Zero Pulse';
@@ -31,16 +25,11 @@ export class VehicleManagementComponent {
 
   selectedFacilityId = this.facilities[0].id;
 
-  getFacilityBusImageUrl(): string {
-    const map: Record<string, string> = {
-      facility_a: '/york-region-transit-facility-a.png',
-      facility_b: '/york-region-transit-facility-b.png',
-    };
+  // Search
+  searchQuery = '';
+  searchResults: BusDetails[] = [];
+  searchMetaById: Record<string, { categoryId: CategoryId; categoryLabel: string }> = {};
 
-    // fallback (in case something is missing)
-    return map[this.selectedFacilityId] ?? '/york-region-transit-facility-a.png';
-  }
-  
   // Snapshot modal
   selectedBus:
     | (BusDetails & {
@@ -55,33 +44,38 @@ export class VehicleManagementComponent {
 
   constructor(private fleet: FleetService) {}
 
-  openBusSnapshot(bus: BusDetails, statusLabel: string) {
-    this.selectedBus = {
-      ...bus,
-      facilityId: this.selectedFacilityId,
-      statusLabel,
-      batteryPct: null,
-      alerts: [],
+  // Facility-based image
+  getFacilityBusImageUrl(): string {
+    const map: Record<string, string> = {
+      facility_a: '/york-region-transit-facility-a.png',
+      facility_b: '/york-region-transit-facility-b.png',
     };
-    this.isSnapshotOpen = true;
+    return map[this.selectedFacilityId] ?? '/york-region-transit-facility-a.png';
   }
 
-  closeBusSnapshot() {
-    this.isSnapshotOpen = false;
+  // Board
+  get board(): Board {
+    return this.fleet.getBoard(this.selectedFacilityId);
   }
 
   get selectedFacility(): Facility {
     return this.facilities.find((f) => f.id === this.selectedFacilityId)!;
   }
 
-  // board comes from FleetService (shared store)
-  get board(): Board {
-    return this.fleet.getBoard(this.selectedFacilityId);
+  // Search row visibility
+  get showSearchRow(): boolean {
+    return this.searchQuery.trim().length > 0;
   }
 
-  // connect all columns (now includes out_of_service automatically because categories list includes it)
+  // Search drop list id (unique per facility)
+  get searchDropListId(): string {
+    return `search__${this.selectedFacilityId}`;
+  }
+
+  // Connect columns to each other, PLUS search list when searching (so columns can accept drag from search)
   get connectedDropListIds(): string[] {
-    return this.categories.map((c) => this.dropListId(c.id));
+    const colIds = this.categories.map((c) => this.dropListId(c.id));
+    return this.showSearchRow ? [...colIds, this.searchDropListId] : colIds;
   }
 
   dropListId(categoryId: CategoryId): string {
@@ -99,22 +93,113 @@ export class VehicleManagementComponent {
 
   onSelectFacility(facilityId: string) {
     this.selectedFacilityId = facilityId;
+
+    // optional: reset search on facility switch
+    this.searchQuery = '';
+    this.searchResults = [];
+    this.searchMetaById = {};
   }
 
+  // Called when user types
+  onSearchChange(value: string) {
+    this.searchQuery = value;
+    this.refreshSearch();
+  }
+
+  clearSearch() {
+    this.searchQuery = '';
+    this.searchResults = [];
+    this.searchMetaById = {};
+  }
+
+  private refreshSearch() {
+    const q = this.searchQuery.trim().toLowerCase();
+
+    if (!q) {
+      this.searchResults = [];
+      this.searchMetaById = {};
+      return;
+    }
+
+    const results: BusDetails[] = [];
+    const meta: Record<string, { categoryId: CategoryId; categoryLabel: string }> = {};
+
+    for (const cat of this.categories) {
+      const list = this.board[cat.id];
+      for (const bus of list) {
+        const labelMatch = bus.label?.toLowerCase().includes(q);
+        const locMatch = String((bus as any).location ?? '').toLowerCase().includes(q);
+
+        if (labelMatch || locMatch) {
+          results.push(bus);
+          meta[bus.id] = { categoryId: cat.id, categoryLabel: cat.label };
+        }
+      }
+    }
+
+    this.searchResults = results;
+    this.searchMetaById = meta;
+  }
+
+  private findBusCategoryId(busId: string): CategoryId | null {
+    for (const cat of this.categories) {
+      if (this.board[cat.id].some((b) => b.id === busId)) return cat.id;
+    }
+    return null;
+  }
+
+  // Drag drop handler for columns
   onDrop(categoryId: CategoryId, event: CdkDragDrop<BusDetails[]>) {
-    // reorder in same column
+    // same column reorder
     if (event.previousContainer === event.container) {
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
       return;
     }
 
-    // move between columns (updates the shared store arrays directly)
-    transferArrayItem(
-      event.previousContainer.data,
-      event.container.data,
-      event.previousIndex,
-      event.currentIndex
-    );
+    const movedBus = event.item.data as BusDetails;
+
+    // From SEARCH to Real column
+    if (event.previousContainer.id === this.searchDropListId) {
+      const fromCat = this.findBusCategoryId(movedBus.id);
+      if (!fromCat) return;
+
+      const fromList = this.board[fromCat];
+      const toList = this.board[categoryId];
+
+      const idx = fromList.findIndex((b) => b.id === movedBus.id);
+      if (idx === -1) return;
+
+      const [busObj] = fromList.splice(idx, 1);
+      toList.splice(event.currentIndex, 0, busObj);
+
+      // refresh search list/meta
+      this.refreshSearch();
+      return;
+    }
+
+    // Normal column to column move
+    const prev = event.previousContainer.data;
+    const next = event.container.data;
+
+    const [busObj] = prev.splice(event.previousIndex, 1);
+    next.splice(event.currentIndex, 0, busObj);
+
+    if (this.showSearchRow) this.refreshSearch();
+  }
+
+  openBusSnapshot(bus: BusDetails, statusLabel: string) {
+    this.selectedBus = {
+      ...bus,
+      facilityId: this.selectedFacilityId,
+      statusLabel,
+      batteryPct: null,
+      alerts: [],
+    };
+    this.isSnapshotOpen = true;
+  }
+
+  closeBusSnapshot() {
+    this.isSnapshotOpen = false;
   }
 
   trackByBusId = (_: number, bus: BusDetails) => bus.id;

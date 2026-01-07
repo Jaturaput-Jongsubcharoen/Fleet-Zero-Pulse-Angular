@@ -1,15 +1,13 @@
 <div class="page">
-  <!-- Header -->
   <header class="header">
     <h1 class="title">{{ title }}</h1>
     <div class="subtitle">{{ subtitle }}</div>
   </header>
 
-  <!-- CONTENT WRAP: forces Facilities + Board to share same width -->
   <div class="content-wrap">
     <div class="layout layout--vertical">
 
-      <!-- TOP ROW: Facilities (HORIZONTAL) -->
+      <!-- Facilities -->
       <section class="facilities-row">
         <div class="sidebar-card">
           <div class="sidebar-title">Facilities</div>
@@ -27,24 +25,116 @@
             </button>
           </div>
 
+          <!-- Search bar under Facilities -->
+          <div class="search-wrap">
+            <input
+              class="search-input"
+              type="text"
+              placeholder="Search bus label or location (e.g., Bus 101, Miller, MOB1)..."
+              [(ngModel)]="searchQuery"
+              (ngModelChange)="onSearchChange($event)"
+            />
+            <button
+              class="search-clear"
+              type="button"
+              *ngIf="showSearchRow"
+              (click)="clearSearch()"
+            >
+              Clear
+            </button>
+          </div>
+
           <div class="sidebar-hint">
             Tip: Drag buses between columns to change status.
           </div>
         </div>
       </section>
 
-      <!-- BOTTOM ROW: Board -->
+      <!-- Board -->
       <section class="board-row">
         <section class="board-shell">
           <div class="board-title">{{ selectedFacility.name }}</div>
 
+          <!-- Search results row (only when searching) -->
+          <div class="search-panel" *ngIf="showSearchRow">
+            <div class="search-panel-header">
+              <div class="search-title">Search Results</div>
+              <div class="search-sub">
+                Matches in {{ selectedFacility.name }} (drag into columns)
+              </div>
+            </div>
+
+            <div
+              class="search-dropzone"
+              cdkDropList
+              [id]="searchDropListId"
+              [cdkDropListData]="searchResults"
+              [cdkDropListConnectedTo]="connectedDropListIds"
+              cdkDropListSortingDisabled="true"
+            >
+              <div class="search-empty" *ngIf="searchResults.length === 0">
+                No buses match "{{ searchQuery }}".
+              </div>
+
+              <div
+                class="search-item"
+                *ngFor="let bus of searchResults; trackBy: trackByBusId"
+              >
+                <div
+                  class="bus bus--img bus--search"
+                  cdkDrag
+                  [cdkDragData]="bus"
+                  cdkDragPreviewContainer="global"
+                  [style.--busImg]="'url(' + getFacilityBusImageUrl() + ')'"
+                >
+                  <div class="bus-top">
+                    <div class="bus-badge">{{ bus.label }}</div>
+                    <div class="bus-loc">{{ bus.location }}</div>
+                  </div>
+
+                  <ng-template cdkDragPlaceholder>
+                    <div class="bus bus--placeholder bus--placeholder--search"></div>
+                  </ng-template>
+
+                  <ng-template cdkDragPreview>
+                    <div
+                      class="bus bus--img bus--preview"
+                      [style.background-image]="'url(' + getFacilityBusImageUrl() + ')'"
+                      style="background-size: cover; background-position: center;"
+                    >
+                      <div class="bus-top">
+                        <div class="bus-badge">{{ bus.label }}</div>
+                        <div class="bus-loc">{{ bus.location }}</div>
+                      </div>
+                    </div>
+                  </ng-template>
+                </div>
+
+                <!-- BELOW the bus silhouette (NOT inside it) -->
+                <div class="search-meta">
+                  <span class="search-meta-label">In:</span>
+                  <span class="search-meta-value">
+                    {{ searchMetaById[bus.id]?.categoryLabel }}
+                  </span>
+                </div>
+              </div>
+
+
+            </div>
+          </div>
+
+          <!-- Columns -->
           <div class="columns">
             <div class="col" *ngFor="let c of categories; trackBy: trackByCategoryId">
               <div class="col-card">
                 <div class="col-header">
                   <span class="col-name">{{ c.label }}</span>
+                  
+                </div>
+                <div class="col-header">
                   <span class="col-count">({{ count(c.id) }} buses)</span>
                 </div>
+                
 
                 <div
                   class="dropzone"
@@ -58,6 +148,7 @@
                     class="bus bus--img"
                     *ngFor="let bus of board[c.id]; trackBy: trackByBusId"
                     cdkDrag
+                    [cdkDragData]="bus"
                     cdkDragPreviewContainer="global"
                     (dblclick)="openBusSnapshot(bus, c.label)"
                     [style.--busImg]="'url(' + getFacilityBusImageUrl() + ')'"
@@ -67,12 +158,10 @@
                       <div class="bus-loc">{{ bus.location }}</div>
                     </div>
 
-                    <!-- Placeholder -->
                     <ng-template cdkDragPlaceholder>
                       <div class="bus bus--placeholder"></div>
                     </ng-template>
 
-                    <!-- Drag preview -->
                     <ng-template cdkDragPreview>
                       <div
                         class="bus bus--img bus--preview"
@@ -85,20 +174,18 @@
                         </div>
                       </div>
                     </ng-template>
-
                   </div>
                 </div>
 
               </div>
             </div>
           </div>
+
         </section>
       </section>
-
     </div>
   </div>
 
-  <!-- Snapshot Modal -->
   <app-bus-snapshot
     *ngIf="isSnapshotOpen && selectedBus"
     [bus]="selectedBus"
