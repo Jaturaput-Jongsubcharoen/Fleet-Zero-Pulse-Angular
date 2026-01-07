@@ -31,6 +31,16 @@ export class VehicleManagementComponent {
 
   selectedFacilityId = this.facilities[0].id;
 
+  getFacilityBusImageUrl(): string {
+    const map: Record<string, string> = {
+      facility_a: '/york-region-transit-facility-a.png',
+      facility_b: '/york-region-transit-facility-b.png',
+    };
+
+    // fallback (in case something is missing)
+    return map[this.selectedFacilityId] ?? '/york-region-transit-facility-a.png';
+  }
+  
   // Snapshot modal
   selectedBus:
     | (BusDetails & {

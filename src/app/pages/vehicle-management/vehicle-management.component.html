@@ -55,58 +55,40 @@
                   (cdkDropListDropped)="onDrop(c.id, $event)"
                 >
                   <div
-                    class="bus"
+                    class="bus bus--img"
                     *ngFor="let bus of board[c.id]; trackBy: trackByBusId"
                     cdkDrag
+                    cdkDragPreviewContainer="global"
                     (dblclick)="openBusSnapshot(bus, c.label)"
+                    [style.--busImg]="'url(' + getFacilityBusImageUrl() + ')'"
                   >
-                    <!--
-                    <div class="grip" aria-hidden="true">
-                      <span>•</span><span>•</span>
-                      <span>•</span><span>•</span>
+                    <div class="bus-top">
+                      <div class="bus-badge">{{ bus.label }}</div>
+                      <div class="bus-loc">{{ bus.location }}</div>
                     </div>
-                    -->
-                    <div class="bus-vehicle">
-                      <div class="bus-front"></div>
-                      <div class="bus-body">
-                        <div class="bus-number">{{ bus.label }}</div>
-                        <div class="bus-windows">
-                          <span></span><span></span><span></span>
-                        </div>
-                      </div>
-                      <div class="bus-wheel left"></div>
-                      <div class="bus-wheel right"></div>
-                    </div>
-                    
+
+                    <!-- Placeholder -->
                     <ng-template cdkDragPlaceholder>
                       <div class="bus bus--placeholder"></div>
                     </ng-template>
 
+                    <!-- Drag preview -->
                     <ng-template cdkDragPreview>
-                      
-                      <div class="bus bus--preview">
-                        <!--
-                        <div class="grip" aria-hidden="true">
-                          <span>•</span><span>•</span>
-                          <span>•</span><span>•</span>
-                        </div>
-                        -->
-                                            <div class="bus-vehicle">
-                      <div class="bus-front"></div>
-                      <div class="bus-body">
-                        <div class="bus-number">{{ bus.label }}</div>
-                        <div class="bus-windows">
-                          <span></span><span></span><span></span>
+                      <div
+                        class="bus bus--img bus--preview"
+                        [style.background-image]="'url(' + getFacilityBusImageUrl() + ')'"
+                        style="background-size: cover; background-position: center;"
+                      >
+                        <div class="bus-top">
+                          <div class="bus-badge">{{ bus.label }}</div>
+                          <div class="bus-loc">{{ bus.location }}</div>
                         </div>
                       </div>
-                      <div class="bus-wheel left"></div>
-                      <div class="bus-wheel right"></div>
-                    </div>
-                      </div>
-                      
                     </ng-template>
+
                   </div>
                 </div>
+
               </div>
             </div>
           </div>

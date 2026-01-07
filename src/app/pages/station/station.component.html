@@ -12,6 +12,7 @@
     <div class="bus-card" *ngFor="let bus of board()[c.id]">
       <div class="bus-left">
         <div class="bus-name">{{ bus.label }}</div>
+        <div class="bus-meta"><b>Location:</b> {{ bus.location }}</div>
         <div class="bus-meta"><b>Status:</b> {{ bus.status }}</div>
         <div class="bus-meta"><b>Last Service:</b> {{ bus.lastService || '--' }}</div>
         <div class="bus-meta"><b>Notes:</b> {{ bus.notes || '--' }}</div>
