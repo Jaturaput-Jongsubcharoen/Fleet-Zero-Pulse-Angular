@@ -34,7 +34,7 @@ export const CATEGORIES = [
   { id: 'out_of_service', label: 'Out of service' },
   { id: 'maintenance', label: 'Maintenance' },
   { id: 'long_term', label: 'Long-term Maintenance' },
-  { id: 'third_party', label: 'off-site' },
+  { id: 'third_party', label: 'Off-Site Maintenance' },
 ] as const;
 
 export const FACILITIES = [
