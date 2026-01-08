@@ -8,6 +8,10 @@ import {
 import { FormsModule } from '@angular/forms';
 
 import { BusSnapshotComponent } from '../../components/bus-snapshot/bus-snapshot.component';
+import { FacilityStripsComponent } from './facility-strips/facility-strips.component';
+import { FacilitySearchComponent } from './facility-search/facility-search.component';
+
+import { FleetService } from '../../data/fleet.service';
 import {
   CATEGORIES,
   FACILITIES,
@@ -16,9 +20,7 @@ import {
   BusDetails,
   FacilityId,
   FacilityConfig,
-} from '../../data/fleet-store';
-import { FleetService } from '../../data/fleet.service';
-import { FacilityStripsComponent } from './facility-strips/facility-strips.component';
+} from '../../data/fleet-store';  
 
 type Facility = FacilityConfig;
 type BayModalMode = 'internal_select';
@@ -29,7 +31,14 @@ type SelectedId = FacilityId | '__ALL__';
 @Component({
   selector: 'app-vehicle-management',
   standalone: true,
-  imports: [CommonModule, DragDropModule, FormsModule, BusSnapshotComponent, FacilityStripsComponent],
+  imports: [
+    CommonModule,
+    DragDropModule,
+    FormsModule,
+    BusSnapshotComponent,
+    FacilityStripsComponent,
+    FacilitySearchComponent,
+  ],
   templateUrl: './vehicle-management.component.html',
   styleUrl: './vehicle-management.component.scss',
 })
@@ -114,7 +123,6 @@ export class VehicleManagementComponent {
     const facId = this.resolvedFacilityId;
     const fac = this.facilities.find((f) => f.id === facId);
 
-    // Fallback: first facility’s image, or a generic one
     return (
       fac?.image ??
       this.facilities[0]?.image ??
@@ -127,7 +135,7 @@ export class VehicleManagementComponent {
     if (this.isAllSelected(this.selectedFacilityId)) {
       return this.fleet.getMergedBoard(this.facilities.map((f) => f.id));
     }
-    return this.fleet.getBoard(this.selectedFacilityId); // narrowed by guard
+    return this.fleet.getBoard(this.selectedFacilityId);
   }
 
   get selectedFacility(): Facility {
@@ -407,10 +415,11 @@ export class VehicleManagementComponent {
   trackByFacilityId = (_: number, f: Facility) => f.id;
   trackByCategoryId = (_: number, c: { id: string }) => c.id;
 
-  
   // helper: null when "All Facilities"
   get selectedFacilityOrNull(): Facility | null {
-    return this.isAllSelected(this.selectedFacilityId) ? null : this.selectedFacility;
+    return this.isAllSelected(this.selectedFacilityId)
+      ? null
+      : this.selectedFacility;
   }
 
   get selectedFacilityTotal(): number {

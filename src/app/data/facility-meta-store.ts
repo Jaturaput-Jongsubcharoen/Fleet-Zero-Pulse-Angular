@@ -18,7 +18,7 @@ export const INITIAL_FACILITY_META: Record<FacilityId, EditableFacilityInfo> = {
   'Miller BRT': {
     address: 'Miller BRT yard address',
     coordinates: '',
-    garageImageUrl: '/assets/york-region-transit_Miller-brt.png',
+    garageImageUrl: '/assets/garage-picture/miller-brt-garage.jpg',
     mechanics: null,
     apprentices: null,
     supportStaff: null,
@@ -29,7 +29,7 @@ export const INITIAL_FACILITY_META: Record<FacilityId, EditableFacilityInfo> = {
   'Miller SE': {
     address: 'Miller SE yard address',
     coordinates: '',
-    garageImageUrl: '/assets/york-region-transit_Miller-se.png',
+    garageImageUrl: '/assets/garage-picture/miller-se-garage.jpg',
     mechanics: null,
     apprentices: null,
     supportStaff: null,
@@ -40,7 +40,7 @@ export const INITIAL_FACILITY_META: Record<FacilityId, EditableFacilityInfo> = {
   'TOK North': {
     address: 'TOK North yard address',
     coordinates: '',
-    garageImageUrl: '/assets/york-region-transit_tok-north.png',
+    garageImageUrl: '/assets/garage-picture/tok-north-garage.jpg',
     mechanics: null,
     apprentices: null,
     supportStaff: null,
@@ -51,7 +51,7 @@ export const INITIAL_FACILITY_META: Record<FacilityId, EditableFacilityInfo> = {
   'TOK West': {
     address: 'TOK West yard address',
     coordinates: '',
-    garageImageUrl: '/assets/york-region-transit_tok-west.png',
+    garageImageUrl: '/assets/garage-picture/tok-west-garage.jpg',
     mechanics: null,
     apprentices: null,
     supportStaff: null,

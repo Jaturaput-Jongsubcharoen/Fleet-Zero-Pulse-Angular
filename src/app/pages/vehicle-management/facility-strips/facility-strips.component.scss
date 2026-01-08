@@ -21,6 +21,7 @@
 .strip-title {
   font-weight: 800;
   font-size: 14px;
+  color: rgb(255, 255, 255)
 }
 
 .strip-tag {
@@ -35,6 +36,7 @@
   margin-top: 2px;
   font-size: 12px;
   opacity: 0.85;
+  color: rgb(255, 255, 255);
 }
 
 .strip-grid {
@@ -53,6 +55,7 @@
 
 .label {
   font-weight: 600;
+  color: rgb(255, 255, 255);
 }
 
 .value {
@@ -60,6 +63,7 @@
   flex-wrap: wrap;
   gap: 4px 8px;
   opacity: 0.9;
+  color: rgb(255, 255, 255);
 }
 
 .value--edit {
@@ -95,11 +99,11 @@
 }
 
 .garage-thumb {
-  width: 80px;
-  height: 34px;
+  width: 180px;   
+  height: auto;
   border-radius: 6px;
   object-fit: cover;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  /*border: 1px solid rgba(255, 255, 255, 0.5);*/
 }
 
 .dot-sep::before {
@@ -123,6 +127,7 @@
 .metric-label {
   font-weight: 600;
   margin-bottom: 4px;
+  color: rgb(255, 255, 255);
 }
 
 .bar {
@@ -144,4 +149,5 @@
   flex-direction: column;
   gap: 2px;
   opacity: 0.85;
+  color: rgb(255, 255, 255);
 }

@@ -1,0 +1,18 @@
+<div class="search-wrap">
+  <input
+    class="search-input"
+    type="text"
+    placeholder="Search bus label or bay (e.g., Bus 101, bay 3, 3)..."
+    [ngModel]="query"
+    (ngModelChange)="onInputChange($event)"
+  />
+
+  <button
+    class="search-clear"
+    type="button"
+    *ngIf="showClear"
+    (click)="onClearClick()"
+  >
+    Clear
+  </button>
+</div>

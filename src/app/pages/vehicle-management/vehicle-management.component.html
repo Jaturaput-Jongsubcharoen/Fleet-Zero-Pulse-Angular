@@ -8,6 +8,7 @@
     <div class="layout layout--vertical">
       <!-- Facilities (now: yards/locations) -->
       <section class="facilities-row">
+        <!-- Facilities + facility strips card -->
         <div class="sidebar-card">
           <div class="sidebar-title">Facilities</div>
 
@@ -51,31 +52,23 @@
             [selectedFacilityId]="selectedFacilityId"
             [allFacilitiesId]="ALL_FACILITIES_ID"
           ></app-facility-strips>
+        </div>
 
-          <!-- Search bar under Facilities -->
-          <div class="search-wrap">
-            <input
-              class="search-input"
-              type="text"
-              placeholder="Search bus label or bay (e.g., Bus 101, bay 3, 3)..."
-              [(ngModel)]="searchQuery"
-              (ngModelChange)="onSearchChange($event)"
-            />
-            <button
-              class="search-clear"
-              type="button"
-              *ngIf="showSearchRow"
-              (click)="clearSearch()"
-            >
-              Clear
-            </button>
-          </div>
+        <!-- Separate card for search bar (same background/color) -->
+        <div class="sidebar-card sidebar-card--search">
+          <app-facility-search
+            [query]="searchQuery"
+            [showClear]="showSearchRow"
+            (queryChange)="onSearchChange($event)"
+            (clear)="clearSearch()"
+          ></app-facility-search>
 
           <div class="sidebar-hint">
             Tip: Drag buses between columns to change status.
           </div>
         </div>
       </section>
+
 
       <!-- Board -->
       <section class="board-row">

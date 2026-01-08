@@ -76,7 +76,7 @@ export const INITIAL_BOARDS: Record<FacilityId, Board> = {
       { id: 'bus-112', label: 'Bus 112', status: 'Inspection', bay: 3, lastService: '2024-01-09', notes: 'Safety check' },
     ],
     third_party: [
-      { id: 'bus-120', label: 'Bus 120', status: 'Vendor repair', bay: 10, lastService: '--', notes: 'Sent to external shop' },
+      { id: 'bus-120', label: 'Bus 120', status: 'Vendor repair', lastService: '--', notes: 'Sent to external shop' },
       { id: 'bus-121', label: 'Bus 121', status: 'Awaiting vendor', lastService: '--', notes: 'Needs bay number at vendor' },
     ],
     storage: [
@@ -99,7 +99,7 @@ export const INITIAL_BOARDS: Record<FacilityId, Board> = {
       { id: 'bus-105', label: 'Bus 105', status: 'Waiting Parts', bay: 1, lastService: '2024-01-05', notes: 'Brake replacement needed' },
     ],
     third_party: [
-      { id: 'bus-122', label: 'Bus 122', status: 'External diagnostics', bay: 7, lastService: '--', notes: 'Sent off-site' },
+      { id: 'bus-122', label: 'Bus 122', status: 'External diagnostics', lastService: '--', notes: 'Sent off-site' },
     ],
     storage: [
       { id: 'bus-115', label: 'Bus 115', status: 'Stored', lastService: '--', notes: '--' },
@@ -131,7 +131,7 @@ export const INITIAL_BOARDS: Record<FacilityId, Board> = {
       { id: 'bus-203', label: 'Bus 203', status: 'Brake replacement', bay: 1, lastService: '2024-01-08', notes: 'Front pads low' },
     ],
     third_party: [
-      { id: 'bus-208', label: 'Bus 208', status: 'Vendor repair', bay: 9, lastService: '--', notes: 'Off-site work' },
+      { id: 'bus-208', label: 'Bus 208', status: 'Vendor repair', lastService: '--', notes: 'Off-site work' },
     ],
     storage: [],
     in_service: [

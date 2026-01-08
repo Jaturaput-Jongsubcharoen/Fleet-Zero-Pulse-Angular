@@ -4,26 +4,17 @@ import { FormsModule } from '@angular/forms';
 
 import {
   CATEGORIES,
-  CategoryId,
   FacilityConfig,
   FacilityId,
 } from '../../../data/fleet-store';
 import { FleetService } from '../../../data/fleet.service';
+import {
+  EditableFacilityInfo,
+} from '../../../data/facility-meta-store';
+import { FacilityMetaService } from '../../../data/facility-meta.service';
 
 // same union as in vehicle-management
 type SelectedId = FacilityId | '__ALL__';
-
-type EditableFacilityInfo = {
-  address: string;
-  coordinates: string;
-  garageImageUrl: string;
-  mechanics: number | null;
-  apprentices: number | null;
-  supportStaff: number | null;
-  maintenanceBays: number | null;
-  facilityScore: number | null;
-  lastAuditDate: string | null;
-};
 
 type EditableFieldKey = keyof EditableFacilityInfo;
 
@@ -43,49 +34,20 @@ export class FacilityStripsComponent {
   @Input({ required: true }) selectedFacilityId!: SelectedId;
   @Input({ required: true }) allFacilitiesId!: SelectedId;
 
-  // categories are only for status breakdown
   readonly categories = CATEGORIES;
-
-  // editable (user-controlled) fields per facility
-  editableInfoByFacility: Record<FacilityId, EditableFacilityInfo> = {} as any;
 
   // which field is currently in "edit" mode
   editing: { facilityId: FacilityId; field: EditableFieldKey } | null = null;
 
-  // non-editable EV share – later this can come from Excel / backend
-  private readonly EV_SHARE: Record<FacilityId, number> = {
-    'Miller BRT': 40,
-    'Miller SE': 55,
-    'TOK North': 35,
-    'TOK West': 60,
-  };
-
-  constructor(private fleet: FleetService) {}
-
-  ngOnInit() {
-    // initialise editable state for each facility (placeholder defaults)
-    for (const f of this.facilities) {
-      if (!this.editableInfoByFacility[f.id]) {
-        this.editableInfoByFacility[f.id] = {
-          address: `${f.name} yard address`,
-          coordinates: '',
-          garageImageUrl: f.image,
-          mechanics: null,
-          apprentices: null,
-          supportStaff: null,
-          maintenanceBays: null,
-          facilityScore: null,
-          lastAuditDate: null,
-        };
-      }
-    }
-  }
+  constructor(
+    private fleet: FleetService,
+    private facilityMeta: FacilityMetaService
+  ) {}
 
   get isAllView(): boolean {
     return this.selectedFacilityId === this.allFacilitiesId;
   }
 
-  // for "All Facilities" we show all; otherwise just the selected one
   get facilitiesToShow(): readonly FacilityConfig[] {
     if (this.isAllView) return this.facilities;
     const fac = this.facilities.find((f) => f.id === this.selectedFacilityId);
@@ -93,7 +55,7 @@ export class FacilityStripsComponent {
   }
 
   getInfo(fid: FacilityId): EditableFacilityInfo {
-    return this.editableInfoByFacility[fid];
+    return this.facilityMeta.getEditableInfo(fid);
   }
 
   // ---- non-editable calculated metrics ----
@@ -107,10 +69,9 @@ export class FacilityStripsComponent {
   }
 
   percentElectric(fid: FacilityId): number {
-    return this.EV_SHARE[fid] ?? 0;
+    return this.facilityMeta.getEvShare(fid);
   }
 
-  // status breakdown for “percentage of status of the buses”
   statusBreakdown(fid: FacilityId): StatusSegment[] {
     const board = this.fleet.getBoard(fid);
     const total = this.vehiclesAssigned(fid);
@@ -123,18 +84,11 @@ export class FacilityStripsComponent {
       return { label: c.label, pct };
     });
 
-    // filter out nulls with a proper type predicate
     return rows.filter((x): x is StatusSegment => x !== null);
   }
 
-  // placeholder: later you can swap this out with real model data from Excel
-  dummyModelBreakdown(_fid: FacilityId): { label: string; pct: number }[] {
-    return [
-      { label: '40ft Diesel', pct: 40 },
-      { label: '60ft Diesel', pct: 20 },
-      { label: '40ft Electric', pct: 25 },
-      { label: 'Other', pct: 15 },
-    ];
+  dummyModelBreakdown(fid: FacilityId) {
+    return this.facilityMeta.getModelBreakdown(fid);
   }
 
   // ---- editing helpers ----
@@ -148,7 +102,8 @@ export class FacilityStripsComponent {
 
   toggleEdit(fid: FacilityId, field: EditableFieldKey) {
     if (this.isEditing(fid, field)) {
-      // Save -> just close edit mode for now
+      // for now we just close edit mode; later you can call
+      // this.facilityMeta.updateEditableInfo(fid, { ... });
       this.editing = null;
     } else {
       this.editing = { facilityId: fid, field };

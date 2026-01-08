@@ -37,14 +37,23 @@
 
 /* -------- Facilities row -------- */
 .facilities-row {
-  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px; // space between facilities card and search card
 }
 
+/* -------- Facilities sidebar -------- */
 .sidebar-card {
   border-radius: 22px;
   padding: 16px;
   background: rgb(74, 79, 73);
   box-shadow: 0 26px 60px rgba(0, 0, 0, 0.45);
+}
+
+.sidebar-card--search {
+  /* inherits background, border-radius, etc. from .sidebar-card */
+  padding-top: 12px;
+  padding-bottom: 12px;
 }
 
 .sidebar-title {
@@ -316,7 +325,7 @@
   margin: 0 0 14px;
   border-radius: 18px;
   padding: 14px;
-  background: radial-gradient(120% 120% at 20% 0%, #1a1a1a, #0f0f0f);
+  background: rgba(122, 122, 122, 0.5);
   box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06),
     0 18px 30px rgba(0,0,0,0.25);
 }
@@ -345,7 +354,7 @@
   border-radius: 16px;
   padding: 12px;
   border: 1px dashed rgba(255,255,255,0.18);
-  background: linear-gradient(#0f0f0f, #0b0b0b);
+  background: rgba(255, 255, 255, 0.08);
   min-height: 96px;
 
   display: flex;
