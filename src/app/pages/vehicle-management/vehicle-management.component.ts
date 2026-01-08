@@ -18,6 +18,7 @@ import {
   FacilityConfig,
 } from '../../data/fleet-store';
 import { FleetService } from '../../data/fleet.service';
+import { FacilityStripsComponent } from './facility-strips/facility-strips.component';
 
 type Facility = FacilityConfig;
 type BayModalMode = 'internal_select';
@@ -28,7 +29,7 @@ type SelectedId = FacilityId | '__ALL__';
 @Component({
   selector: 'app-vehicle-management',
   standalone: true,
-  imports: [CommonModule, DragDropModule, FormsModule, BusSnapshotComponent],
+  imports: [CommonModule, DragDropModule, FormsModule, BusSnapshotComponent, FacilityStripsComponent],
   templateUrl: './vehicle-management.component.html',
   styleUrl: './vehicle-management.component.scss',
 })
@@ -405,4 +406,24 @@ export class VehicleManagementComponent {
   trackByBusId = (_: number, bus: BusDetails) => bus.id;
   trackByFacilityId = (_: number, f: Facility) => f.id;
   trackByCategoryId = (_: number, c: { id: string }) => c.id;
+
+  
+  // helper: null when "All Facilities"
+  get selectedFacilityOrNull(): Facility | null {
+    return this.isAllSelected(this.selectedFacilityId) ? null : this.selectedFacility;
+  }
+
+  get selectedFacilityTotal(): number {
+    return this.isAllSelected(this.selectedFacilityId)
+      ? this.allFacilitiesTotal()
+      : this.facilityTotal(this.selectedFacility.id);
+  }
+
+  get statusCountsForSelected() {
+    return this.categories.map((c) => ({
+      id: c.id,
+      label: c.label,
+      count: this.board[c.id].length,
+    }));
+  }
 }
