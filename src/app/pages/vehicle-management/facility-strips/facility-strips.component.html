@@ -16,190 +16,196 @@
       <ng-container *ngIf="getInfo(f.id) as info">
         <!-- editable info rows -->
         <div class="strip-grid">
-          <!-- Address & coordinates -->
-          <div class="strip-row">
-            <div class="label">Address &amp; Coordinates</div>
+          <!-- LEFT COLUMN: all text fields -->
+          <div class="strip-grid-left">
+            <!-- Address & coordinates -->
+            <div class="strip-row">
+              <div class="label">Address &amp; Coordinates</div>
 
-            <div class="value" *ngIf="!isEditing(f.id, 'address')">
-              {{ info.address || 'Not set' }}
-              <span *ngIf="info.coordinates">
-                · {{ info.coordinates }}
-              </span>
+              <div class="value" *ngIf="!isEditing(f.id, 'address')">
+                {{ info.address || 'Not set' }}
+                <span *ngIf="info.coordinates">
+                  · {{ info.coordinates }}
+                </span>
+              </div>
+
+              <div class="value value--edit" *ngIf="isEditing(f.id, 'address')">
+                <input
+                  type="text"
+                  placeholder="Facility address"
+                  [(ngModel)]="info.address"
+                />
+                <input
+                  type="text"
+                  placeholder="Coordinates (lat, lng)"
+                  [(ngModel)]="info.coordinates"
+                />
+              </div>
+
+              <button
+                type="button"
+                class="mini-btn"
+                (click)="toggleEdit(f.id, 'address')"
+              >
+                {{ isEditing(f.id, 'address') ? 'Save' : 'Edit' }}
+              </button>
             </div>
 
-            <div class="value value--edit" *ngIf="isEditing(f.id, 'address')">
-              <input
-                type="text"
-                placeholder="Facility address"
-                [(ngModel)]="info.address"
-              />
-              <input
-                type="text"
-                placeholder="Coordinates (lat, lng)"
-                [(ngModel)]="info.coordinates"
-              />
+            <!-- Mechanics -->
+            <div class="strip-row">
+              <div class="label">Mechanics</div>
+
+              <div class="value" *ngIf="!isEditing(f.id, 'mechanics')">
+                {{ info.mechanics ?? 'Not set' }}
+              </div>
+
+              <div class="value value--edit" *ngIf="isEditing(f.id, 'mechanics')">
+                <input type="number" min="0" [(ngModel)]="info.mechanics" />
+              </div>
+
+              <button
+                type="button"
+                class="mini-btn"
+                (click)="toggleEdit(f.id, 'mechanics')"
+              >
+                {{ isEditing(f.id, 'mechanics') ? 'Save' : 'Edit' }}
+              </button>
             </div>
 
-            <button
-              type="button"
-              class="mini-btn"
-              (click)="toggleEdit(f.id, 'address')"
-            >
-              {{ isEditing(f.id, 'address') ? 'Save' : 'Edit' }}
-            </button>
+            <!-- Apprentices -->
+            <div class="strip-row">
+              <div class="label">Apprentices</div>
+
+              <div class="value" *ngIf="!isEditing(f.id, 'apprentices')">
+                {{ info.apprentices ?? 'Not set' }}
+              </div>
+
+              <div class="value value--edit" *ngIf="isEditing(f.id, 'apprentices')">
+                <input type="number" min="0" [(ngModel)]="info.apprentices" />
+              </div>
+
+              <button
+                type="button"
+                class="mini-btn"
+                (click)="toggleEdit(f.id, 'apprentices')"
+              >
+                {{ isEditing(f.id, 'apprentices') ? 'Save' : 'Edit' }}
+              </button>
+            </div>
+
+            <!-- Support staff -->
+            <div class="strip-row">
+              <div class="label">Support Staff</div>
+
+              <div class="value" *ngIf="!isEditing(f.id, 'supportStaff')">
+                {{ info.supportStaff ?? 'Not set' }}
+              </div>
+
+              <div class="value value--edit" *ngIf="isEditing(f.id, 'supportStaff')">
+                <input type="number" min="0" [(ngModel)]="info.supportStaff" />
+              </div>
+
+              <button
+                type="button"
+                class="mini-btn"
+                (click)="toggleEdit(f.id, 'supportStaff')"
+              >
+                {{ isEditing(f.id, 'supportStaff') ? 'Save' : 'Edit' }}
+              </button>
+            </div>
+
+            <!-- Maintenance bays -->
+            <div class="strip-row">
+              <div class="label">Maintenance Bays</div>
+
+              <div class="value" *ngIf="!isEditing(f.id, 'maintenanceBays')">
+                {{ info.maintenanceBays ?? 'Not set' }}
+              </div>
+
+              <div class="value value--edit" *ngIf="isEditing(f.id, 'maintenanceBays')">
+                <input type="number" min="0" [(ngModel)]="info.maintenanceBays" />
+              </div>
+
+              <button
+                type="button"
+                class="mini-btn"
+                (click)="toggleEdit(f.id, 'maintenanceBays')"
+              >
+                {{ isEditing(f.id, 'maintenanceBays') ? 'Save' : 'Edit' }}
+              </button>
+            </div>
+
+            <!-- Facility score + last audit -->
+            <div class="strip-row">
+              <div class="label">Facility Score &amp; Last Audit</div>
+
+              <div class="value" *ngIf="!isEditing(f.id, 'facilityScore')">
+                <span>Score: {{ info.facilityScore ?? 'Not set' }}</span>
+                <span class="dot-sep"></span>
+                <span>Audit: {{ info.lastAuditDate ?? 'Not set' }}</span>
+              </div>
+
+              <div
+                class="value value--edit"
+                *ngIf="isEditing(f.id, 'facilityScore')"
+              >
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  placeholder="Score (0–100)"
+                  [(ngModel)]="info.facilityScore"
+                />
+                <input type="date" [(ngModel)]="info.lastAuditDate" />
+              </div>
+
+              <button
+                type="button"
+                class="mini-btn"
+                (click)="toggleEdit(f.id, 'facilityScore')"
+              >
+                {{ isEditing(f.id, 'facilityScore') ? 'Save' : 'Edit' }}
+              </button>
+            </div>
           </div>
 
-          <!-- Picture of garage -->
-          <div class="strip-row">
-            <div class="label">Garage Picture</div>
+          <!-- RIGHT COLUMN: only garage picture -->
+          <div class="strip-grid-right">
+            <div class="strip-row strip-row--garage">
+              <div class="label">Garage Picture</div>
 
-            <div class="value" *ngIf="!isEditing(f.id, 'garageImageUrl')">
-              <img
-                *ngIf="info.garageImageUrl"
-                [src]="info.garageImageUrl"
-                alt="{{ f.name }} garage"
-                class="garage-thumb"
-              />
-              <span *ngIf="!info.garageImageUrl">Not set</span>
+              <div class="value" *ngIf="!isEditing(f.id, 'garageImageUrl')">
+                <img
+                  *ngIf="info.garageImageUrl"
+                  [src]="info.garageImageUrl"
+                  alt="{{ f.name }} garage"
+                  class="garage-thumb"
+                />
+                <span *ngIf="!info.garageImageUrl">Not set</span>
+              </div>
+
+              <div
+                class="value value--edit"
+                *ngIf="isEditing(f.id, 'garageImageUrl')"
+              >
+                <input
+                  type="text"
+                  placeholder="Image URL"
+                  [(ngModel)]="info.garageImageUrl"
+                />
+              </div>
+
+              <button
+                type="button"
+                class="mini-btn"
+                (click)="toggleEdit(f.id, 'garageImageUrl')"
+              >
+                {{ isEditing(f.id, 'garageImageUrl') ? 'Save' : 'Edit' }}
+              </button>
             </div>
-
-            <div class="value value--edit" *ngIf="isEditing(f.id, 'garageImageUrl')">
-              <input
-                type="text"
-                placeholder="Image URL"
-                [(ngModel)]="info.garageImageUrl"
-              />
-            </div>
-
-            <button
-              type="button"
-              class="mini-btn"
-              (click)="toggleEdit(f.id, 'garageImageUrl')"
-            >
-              {{ isEditing(f.id, 'garageImageUrl') ? 'Save' : 'Edit' }}
-            </button>
-          </div>
-
-          <!-- Mechanics -->
-          <div class="strip-row">
-            <div class="label">Mechanics</div>
-
-            <div class="value" *ngIf="!isEditing(f.id, 'mechanics')">
-              {{ info.mechanics ?? 'Not set' }}
-            </div>
-
-            <div class="value value--edit" *ngIf="isEditing(f.id, 'mechanics')">
-              <input type="number" min="0" [(ngModel)]="info.mechanics" />
-            </div>
-
-            <button
-              type="button"
-              class="mini-btn"
-              (click)="toggleEdit(f.id, 'mechanics')"
-            >
-              {{ isEditing(f.id, 'mechanics') ? 'Save' : 'Edit' }}
-            </button>
-          </div>
-
-          <!-- Apprentices -->
-          <div class="strip-row">
-            <div class="label">Apprentices</div>
-
-            <div class="value" *ngIf="!isEditing(f.id, 'apprentices')">
-              {{ info.apprentices ?? 'Not set' }}
-            </div>
-
-            <div class="value value--edit" *ngIf="isEditing(f.id, 'apprentices')">
-              <input type="number" min="0" [(ngModel)]="info.apprentices" />
-            </div>
-
-            <button
-              type="button"
-              class="mini-btn"
-              (click)="toggleEdit(f.id, 'apprentices')"
-            >
-              {{ isEditing(f.id, 'apprentices') ? 'Save' : 'Edit' }}
-            </button>
-          </div>
-
-          <!-- Support staff -->
-          <div class="strip-row">
-            <div class="label">Support Staff</div>
-
-            <div class="value" *ngIf="!isEditing(f.id, 'supportStaff')">
-              {{ info.supportStaff ?? 'Not set' }}
-            </div>
-
-            <div class="value value--edit" *ngIf="isEditing(f.id, 'supportStaff')">
-              <input type="number" min="0" [(ngModel)]="info.supportStaff" />
-            </div>
-
-            <button
-              type="button"
-              class="mini-btn"
-              (click)="toggleEdit(f.id, 'supportStaff')"
-            >
-              {{ isEditing(f.id, 'supportStaff') ? 'Save' : 'Edit' }}
-            </button>
-          </div>
-
-          <!-- Maintenance bays -->
-          <div class="strip-row">
-            <div class="label">Maintenance Bays</div>
-
-            <div class="value" *ngIf="!isEditing(f.id, 'maintenanceBays')">
-              {{ info.maintenanceBays ?? 'Not set' }}
-            </div>
-
-            <div
-              class="value value--edit"
-              *ngIf="isEditing(f.id, 'maintenanceBays')"
-            >
-              <input type="number" min="0" [(ngModel)]="info.maintenanceBays" />
-            </div>
-
-            <button
-              type="button"
-              class="mini-btn"
-              (click)="toggleEdit(f.id, 'maintenanceBays')"
-            >
-              {{ isEditing(f.id, 'maintenanceBays') ? 'Save' : 'Edit' }}
-            </button>
-          </div>
-
-          <!-- Facility score + last audit -->
-          <div class="strip-row">
-            <div class="label">Facility Score &amp; Last Audit</div>
-
-            <div class="value" *ngIf="!isEditing(f.id, 'facilityScore')">
-              <span>Score: {{ info.facilityScore ?? 'Not set' }}</span>
-              <span class="dot-sep"></span>
-              <span>Audit: {{ info.lastAuditDate ?? 'Not set' }}</span>
-            </div>
-
-            <div
-              class="value value--edit"
-              *ngIf="isEditing(f.id, 'facilityScore')"
-            >
-              <input
-                type="number"
-                min="0"
-                max="100"
-                placeholder="Score (0–100)"
-                [(ngModel)]="info.facilityScore"
-              />
-              <input type="date" [(ngModel)]="info.lastAuditDate" />
-            </div>
-
-            <button
-              type="button"
-              class="mini-btn"
-              (click)="toggleEdit(f.id, 'facilityScore')"
-            >
-              {{ isEditing(f.id, 'facilityScore') ? 'Save' : 'Edit' }}
-            </button>
           </div>
         </div>
+
 
         <!-- non-editable: charts/metrics -->
         <div class="metrics-row">

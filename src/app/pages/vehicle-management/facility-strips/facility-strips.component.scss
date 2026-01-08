@@ -41,8 +41,27 @@
 
 .strip-grid {
   display: grid;
-  gap: 4px;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1.6fr);
+  column-gap: 40px;
+  row-gap: 12px;
+  align-items: flex-start;
 }
+
+.strip-grid-left,
+.strip-grid-right {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.strip-row--garage {
+  align-items: flex-start;
+}
+
+.strip-row--garage .label {
+  margin-bottom: 8px;
+}
+
 
 .strip-row {
   display: grid;
@@ -99,11 +118,12 @@
 }
 
 .garage-thumb {
-  width: 180px;   
+  display: block;
+  width: 100%;
+  max-width: 320px;
   height: auto;
-  border-radius: 6px;
+  border-radius: 8px;
   object-fit: cover;
-  /*border: 1px solid rgba(255, 255, 255, 0.5);*/
 }
 
 .dot-sep::before {
@@ -150,4 +170,14 @@
   gap: 2px;
   opacity: 0.85;
   color: rgb(255, 255, 255);
+}
+
+@media (max-width: 900px) {
+  .strip-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .strip-grid-right {
+    margin-top: 12px;
+  }
 }

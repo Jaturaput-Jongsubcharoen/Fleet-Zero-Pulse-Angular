@@ -13,6 +13,9 @@ import {
 } from '../../../data/facility-meta-store';
 import { FacilityMetaService } from '../../../data/facility-meta.service';
 
+import { ChartConfiguration, ChartType } from 'chart.js';
+import { SpkChartjsComponent } from '../../../@spk/reusable-charts/spk-chartjs/spk-chartjs.component';
+
 // same union as in vehicle-management
 type SelectedId = FacilityId | '__ALL__';
 
