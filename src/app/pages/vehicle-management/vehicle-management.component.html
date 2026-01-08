@@ -155,7 +155,11 @@
           <!-- Columns -->
           <div class="columns">
             <div class="col" *ngFor="let c of categories; trackBy: trackByCategoryId">
-              <div class="col-card" [class.col-card--third-party]="c.id === 'third_party'">
+              <div
+                class="col-card"
+                [class.col-card--third-party]="c.id === 'third_party'"
+                [class.col-card--bay-required]="c.id === 'maintenance' || c.id === 'long_term'"
+              >
                 <div class="col-header">
                   <span class="col-name">{{ c.label }}</span>
                 </div>

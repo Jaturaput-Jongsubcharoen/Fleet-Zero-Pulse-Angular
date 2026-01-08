@@ -15,10 +15,11 @@ import {
   Board,
   BusDetails,
   FacilityId,
+  FacilityConfig,
 } from '../../data/fleet-store';
 import { FleetService } from '../../data/fleet.service';
 
-type Facility = { id: FacilityId; name: string };
+type Facility = FacilityConfig;
 type BayModalMode = 'internal_select';
 
 // special id for “All facilities” view
@@ -93,9 +94,11 @@ export class VehicleManagementComponent {
 
   // whenever you need a single FacilityId (image, label fallback, etc.)
   private get resolvedFacilityId(): FacilityId {
-    return this.isAllSelected(this.selectedFacilityId)
-      ? 'Miller BRT'
-      : this.selectedFacilityId;
+    if (this.isAllSelected(this.selectedFacilityId)) {
+      // Use first facility as default when "All" is selected
+      return this.facilities[0]?.id;
+    }
+    return this.selectedFacilityId;
   }
 
   // label for board title
@@ -105,18 +108,17 @@ export class VehicleManagementComponent {
       : this.selectedFacility.name;
   }
 
-  // Bus silhouette image (in All view pick a default)
+  // Bus silhouette image (no hardcoded map; driven by FACILITIES config)
   getFacilityBusImageUrl(): string {
-    const map: Record<FacilityId, string> = {
-      'Miller BRT': '/assets/york-region-transit_Miller-brt.png',
-      'Miller SE': '/assets/york-region-transit_Miller-se.png',
-      MOB1: '/assets/york-region-transit_mob1.png',
-      MOB2: '/assets/york-region-transit_mob2.png',
-      'TOK North': '/assets/york-region-transit_tok-north.png',
-      'TOK West': '/assets/york-region-transit_tok-west.png',
-    };
+    const facId = this.resolvedFacilityId;
+    const fac = this.facilities.find((f) => f.id === facId);
 
-    return map[this.resolvedFacilityId] ?? map['Miller BRT'];
+    // Fallback: first facility’s image, or a generic one
+    return (
+      fac?.image ??
+      this.facilities[0]?.image ??
+      '/assets/york-region-transit_Miller-brt.png'
+    );
   }
 
   // Board (either single facility OR merged)
@@ -129,8 +131,16 @@ export class VehicleManagementComponent {
 
   get selectedFacility(): Facility {
     if (this.isAllSelected(this.selectedFacilityId)) {
-      return { id: this.resolvedFacilityId, name: 'All Facilities' };
+      const base =
+        this.facilities.find((f) => f.id === this.resolvedFacilityId) ??
+        this.facilities[0];
+
+      return {
+        ...base,
+        name: 'All Facilities',
+      };
     }
+
     return (
       this.facilities.find((f) => f.id === this.selectedFacilityId) ??
       this.facilities[0]
@@ -215,7 +225,6 @@ export class VehicleManagementComponent {
       { categoryId: CategoryId; categoryLabel: string } | undefined
     > = {};
 
-    // Search in CURRENT board (single or merged)
     for (const cat of this.categories) {
       const list = this.board[cat.id];
 
@@ -223,7 +232,8 @@ export class VehicleManagementComponent {
         const labelMatch = (bus.label ?? '').toLowerCase().includes(q);
 
         const bayText = typeof bus.bay === 'number' ? `bay ${bus.bay}` : '';
-        const bayMatch = bayText.includes(q) || String(bus.bay ?? '').includes(q);
+        const bayMatch =
+          bayText.includes(q) || String(bus.bay ?? '').includes(q);
 
         if (labelMatch || bayMatch) {
           results.push(bus);
@@ -243,8 +253,6 @@ export class VehicleManagementComponent {
     return null;
   }
 
-  // In All Facilities view, a bus id might exist in multiple facilities.
-  // Find which facility owns that bus.
   private findBusFacilityId(busId: string): FacilityId | null {
     for (const f of this.facilities) {
       const b = this.fleet.getBoard(f.id);
@@ -256,7 +264,6 @@ export class VehicleManagementComponent {
   }
 
   onDrop(toCategory: CategoryId, event: CdkDragDrop<BusDetails[]>) {
-    // reorder in same column
     if (event.previousContainer === event.container) {
       moveItemInArray(
         event.container.data,
@@ -268,17 +275,15 @@ export class VehicleManagementComponent {
 
     const movedBus = event.item.data as BusDetails;
 
-    // fromCategory in current view
     const fromCategory = this.findBusCategoryId(movedBus.id);
     if (!fromCategory) return;
 
-    // determine which facility this bus belongs to
     let fromFacilityId: FacilityId | null;
 
     if (this.isAllSelected(this.selectedFacilityId)) {
       fromFacilityId = this.findBusFacilityId(movedBus.id);
     } else {
-      fromFacilityId = this.selectedFacilityId; // narrowed
+      fromFacilityId = this.selectedFacilityId;
     }
 
     if (!fromFacilityId) return;
@@ -337,10 +342,8 @@ export class VehicleManagementComponent {
       this.pendingMove = null;
 
       this.bayModalMode = 'internal_select';
-
       this.bayOptions = [];
       this.baySelected = null;
-
       this.bayErrorMsg = '';
     }, 200);
   }
@@ -365,8 +368,10 @@ export class VehicleManagementComponent {
     );
 
     if (!res.ok) {
-      if (res.reason === 'bay_taken') this.bayErrorMsg = 'That bay is already taken.';
-      else if (res.reason === 'bay_invalid') this.bayErrorMsg = 'That bay is not valid.';
+      if (res.reason === 'bay_taken')
+        this.bayErrorMsg = 'That bay is already taken.';
+      else if (res.reason === 'bay_invalid')
+        this.bayErrorMsg = 'That bay is not valid.';
       else this.bayErrorMsg = 'Bay number is required.';
       return;
     }

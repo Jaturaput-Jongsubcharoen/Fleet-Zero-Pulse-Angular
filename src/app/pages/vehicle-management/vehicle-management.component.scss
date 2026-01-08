@@ -146,7 +146,7 @@
 .col-card {
   border-radius: 20px;
   padding: 14px 14px 16px;
-  background: rgba(43, 46, 42, 0.8);
+  background: rgba(103, 103, 103, 0.5);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06),
     0 18px 30px rgba(0, 0, 0, 0.35);
 }
@@ -485,19 +485,21 @@
   background: rgba(255, 255, 255, 0.55);
 }
 
-
-
+.col-card--bay-required {
+  background: rgba(40, 40, 40, 0.8);         /* cooler blue tone to stand out */
+  border-color: #b5d2ff;
+}
 
 /* Different color for 3rd party maintenance column */
 .col-card--third-party {
-  background: rgba(60, 45, 110, 0.85); /* purple-ish */
+  background: rgba(0, 0, 0, 0.80); /* purple-ish */
   box-shadow:
     inset 0 0 0 1px rgba(255, 255, 255, 0.08),
     0 18px 30px rgba(0, 0, 0, 0.35);
 }
 
 .col-card--third-party .col-name {
-  color: rgba(220, 210, 255, 0.95);
+  color: rgba(255, 255, 255, 0.95);
 }
 
 
@@ -509,15 +511,15 @@
 .fac-items {
   display: grid;
   grid-template-columns: 210px 1fr; /* left fixed, right flexible */
-  gap: 12px;
   align-items: start;
 }
 
 .fac-col-all {
-  /* left column stays fixed */
+  /*background: rgba(255, 255, 255, 0.06);*/
 }
 
 .fac-col-list {
+  /*background: rgba(255, 255, 255, 0.04);*/
   min-width: 0; /* IMPORTANT: allows the scroll container to shrink */
 }
 

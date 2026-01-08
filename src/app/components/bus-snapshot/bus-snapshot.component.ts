@@ -1,5 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, EventEmitter, HostListener, Input, Output } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  EventEmitter,
+  HostListener,
+  Input,
+  Output,
+} from '@angular/core';
 
 type SnapshotBus = {
   id: string;
@@ -20,11 +27,20 @@ type SnapshotBus = {
 export class BusSnapshotComponent implements AfterViewInit {
   @Input({ required: true }) bus!: SnapshotBus;
 
+  // configurable UI text (with defaults)
+  @Input() title = 'Bus Pop-up';
+  @Input() facilityLabel = 'Facility';
+  @Input() statusLabel = 'Status';
+  @Input() batteryLabel = 'Battery';
+  @Input() alertsLabel = 'Alerts';
+  @Input() closeLabel = 'Close';
+  @Input() viewFullLabel = 'View Full Details';
+
   @Output() close = new EventEmitter<void>();
   @Output() viewFull = new EventEmitter<string>();
 
-  isVisible = false;   // ✅ for enter animation
-  isClosing = false;   // ✅ for exit animation
+  isVisible = false; // for enter animation
+  isClosing = false; // for exit animation
 
   ngAfterViewInit(): void {
     // Next frame => triggers transition from hidden -> visible
@@ -65,7 +81,9 @@ export class BusSnapshotComponent implements AfterViewInit {
   }
 
   batteryText() {
-    if (this.bus.batteryPct === null || this.bus.batteryPct === undefined) return '—%';
+    if (this.bus.batteryPct === null || this.bus.batteryPct === undefined) {
+      return '—%';
+    }
     return `${this.bus.batteryPct}%`;
   }
 

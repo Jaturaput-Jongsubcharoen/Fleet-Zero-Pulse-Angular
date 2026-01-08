@@ -27,7 +27,7 @@ export class StationComponent {
   facilityId: FacilityId = 'Miller BRT';
   facilityName = 'Miller BRT';
 
-  // Use a real board object (never undefined)
+  // Always hold a real Board object
   boardData: Board = this.createEmptyBoard();
 
   // animation states
@@ -48,14 +48,13 @@ export class StationComponent {
       }
     | null = null;
 
-  // Map old routes like /station/facility_a to your new FacilityId values
+  // Map old route slugs like /station/facility_a to your FacilityId values
   private readonly ROUTE_TO_FACILITY: Record<string, FacilityId> = {
     facility_a: 'Miller BRT',
     facility_b: 'Miller SE',
-    mob1: 'MOB1',
-    mob2: 'MOB2',
     tok_north: 'TOK North',
     tok_west: 'TOK West',
+    // MOB1/MOB2 removed from the domain, so no mapping needed anymore
   };
 
   constructor(private route: ActivatedRoute, private fleet: FleetService) {
@@ -64,18 +63,23 @@ export class StationComponent {
 
       // 1) Convert route param to a valid FacilityId
       const mapped = this.ROUTE_TO_FACILITY[rawParam];
-      const isDirectFacilityId = this.facilities.some((f) => f.id === (rawParam as FacilityId));
+      const isDirectFacilityId = this.facilities.some(
+        (f) => f.id === (rawParam as FacilityId)
+      );
 
-      this.facilityId = mapped ?? (isDirectFacilityId ? (rawParam as FacilityId) : 'Miller BRT');
+      this.facilityId =
+        mapped ?? (isDirectFacilityId ? (rawParam as FacilityId) : 'Miller BRT');
 
       // 2) Set display name
       this.facilityName =
-        this.facilities.find((f) => f.id === this.facilityId)?.name ?? this.facilityId;
+        this.facilities.find((f) => f.id === this.facilityId)?.name ??
+        this.facilityId;
 
       // 3) Always set a safe board
-      this.boardData = this.fleet.getBoard(this.facilityId) ?? this.createEmptyBoard();
+      this.boardData =
+        this.fleet.getBoard(this.facilityId) ?? this.createEmptyBoard();
 
-      // close editor when switching facility
+      // reset editor state when switching facility
       this.isSheetOpen = false;
       this.isSheetVisible = false;
       this.editing = null;
@@ -84,7 +88,7 @@ export class StationComponent {
     });
   }
 
-  // No more board() function calls in the template
+  // Expose board for the template
   get board(): Board {
     return this.boardData;
   }
@@ -134,7 +138,10 @@ export class StationComponent {
     const toCat = this.editing.toCatId;
 
     if (toCat === 'maintenance' || toCat === 'long_term') {
-      this.bayOptions = this.fleet.getAvailableBays(this.facilityId, this.editing.bus.id);
+      this.bayOptions = this.fleet.getAvailableBays(
+        this.facilityId,
+        this.editing.bus.id
+      );
 
       if (
         typeof this.editing.bus.bay === 'number' &&
@@ -161,7 +168,7 @@ export class StationComponent {
 
     const { fromCatId, toCatId, bus } = this.editing;
 
-    // validation
+    // validation for bay
     if (this.needsBay(toCatId)) {
       const chosen = bus.bay;
 
@@ -171,7 +178,8 @@ export class StationComponent {
       }
 
       if (!this.bayOptions.includes(chosen)) {
-        this.editErrorMsg = 'That bay is not available. Please choose another.';
+        this.editErrorMsg =
+          'That bay is not available. Please choose another.';
         return;
       }
     } else {
@@ -180,7 +188,7 @@ export class StationComponent {
 
     const toLabel = this.categoryLabel(toCatId) || bus.status;
 
-    // update details in original category
+    // 1) update details in original category
     this.fleet.updateBus(this.facilityId, fromCatId, bus.id, {
       status: toLabel,
       lastService: bus.lastService,
@@ -188,7 +196,7 @@ export class StationComponent {
       bay: this.needsBay(toCatId) ? bus.bay : undefined,
     });
 
-    // move if changed
+    // 2) move bus if category changed
     if (fromCatId !== toCatId) {
       const res = this.fleet.moveBusCategory(
         this.facilityId,
@@ -199,14 +207,18 @@ export class StationComponent {
       );
 
       if (!res.ok) {
-        if (res.reason === 'bay_taken') this.editErrorMsg = 'That bay is already taken.';
-        else if (res.reason === 'bay_invalid') this.editErrorMsg = 'That bay is not allowed for this facility.';
+        if (res.reason === 'bay_taken')
+          this.editErrorMsg = 'That bay is already taken.';
+        else if (res.reason === 'bay_invalid')
+          this.editErrorMsg =
+            'That bay is not allowed for this facility.';
         else this.editErrorMsg = 'Bay number is required.';
         return;
       }
 
-      // refresh local board reference (safe)
-      this.boardData = this.fleet.getBoard(this.facilityId) ?? this.createEmptyBoard();
+      // refresh local board reference
+      this.boardData =
+        this.fleet.getBoard(this.facilityId) ?? this.createEmptyBoard();
     }
 
     this.cancelEdit();
@@ -214,7 +226,9 @@ export class StationComponent {
 
   private createEmptyBoard(): Board {
     const empty = {} as Board;
-    for (const c of this.categories) empty[c.id] = [];
+    for (const c of this.categories) {
+      empty[c.id] = [];
+    }
     return empty;
   }
 }

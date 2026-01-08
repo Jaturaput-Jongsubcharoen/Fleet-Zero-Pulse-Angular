@@ -11,9 +11,15 @@
     (click)="stop($event)"
   >
     <div class="modal-header">
-      <div class="modal-title">Bus Snapshot</div>
+      
+      <div class="modal-title">{{ title }}</div>
 
-      <button class="icon-btn" type="button" (click)="onCloseClick()" aria-label="Close">
+      <button
+        class="icon-btn"
+        type="button"
+        (click)="onCloseClick()"
+        aria-label="Close"
+      >
         ✕
       </button>
     </div>
@@ -21,17 +27,27 @@
     <div class="modal-body">
       <div class="snapshot-text">
         <div>{{ bus.label }}</div>
-        <div>Facility {{ bus.facilityId ?? '—' }}</div>
-        <div>Status {{ bus.statusLabel ?? '—' }}</div>
-        <div>Battery {{ batteryText() }}</div>
-        <div>Alerts {{ alertsText() }}</div>
+        <div>{{ facilityLabel }} {{ bus.facilityId ?? '—' }}</div>
+        <div>{{ statusLabel }} {{ bus.statusLabel ?? '—' }}</div>
+        <div>{{ batteryLabel }} {{ batteryText() }}</div>
+        <div>{{ alertsLabel }} {{ alertsText() }}</div>
       </div>
     </div>
 
     <div class="modal-footer">
-      <button class="btn ghost" type="button" (click)="onCloseClick()">Close</button>
-      <button class="btn primary" type="button" (click)="onViewFullClick()">
-        View Full Details
+      <button
+        class="btn ghost"
+        type="button"
+        (click)="onCloseClick()"
+      >
+        {{ closeLabel }}
+      </button>
+      <button
+        class="btn primary"
+        type="button"
+        (click)="onViewFullClick()"
+      >
+        {{ viewFullLabel }}
       </button>
     </div>
   </div>
