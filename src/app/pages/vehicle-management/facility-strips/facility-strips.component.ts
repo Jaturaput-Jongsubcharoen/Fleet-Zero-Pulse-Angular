@@ -57,7 +57,7 @@ export class FacilityStripsComponent {
       tooltip: {
         enabled: true, // still show tooltip on hover if you like
       },
-      // ⬇️ NEW: labels inside each slice
+      // NEW: labels inside each slice
       datalabels: {
         color: '#ffffff',
         // Put the text in the middle of each arc

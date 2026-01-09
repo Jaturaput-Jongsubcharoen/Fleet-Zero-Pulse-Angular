@@ -1,0 +1,31 @@
+<div class="bay-modal" [class.visible]="isVisible" (click)="$event.stopPropagation()">
+  <div class="bay-modal-header">
+    <div class="bay-modal-title">Select Bay</div>
+    <button class="bay-x" type="button" (click)="onCancelClick()">✕</button>
+  </div>
+
+  <div class="bay-modal-body">
+    <div class="bay-help">
+      Bay number is required to move into
+      <b>Maintenance</b> or <b>Long-term Maintenance</b>.
+    </div>
+
+    <label class="bay-label">
+      Bay number
+      <select
+        class="bay-select"
+        [ngModel]="baySelected"
+        (ngModelChange)="onBayChange($event)"
+      >
+        <option *ngFor="let b of bayOptions" [ngValue]="b">Bay {{ b }}</option>
+      </select>
+    </label>
+
+    <div class="bay-error" *ngIf="bayErrorMsg">{{ bayErrorMsg }}</div>
+  </div>
+
+  <div class="bay-modal-actions">
+    <button class="btn ghost" type="button" (click)="onCancelClick()">Cancel</button>
+    <button class="btn primary" type="button" (click)="onConfirmClick()">Save</button>
+  </div>
+</div>

@@ -1,10 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import {
-  CdkDragDrop,
-  DragDropModule,
-  moveItemInArray,
-} from '@angular/cdk/drag-drop';
+import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { FormsModule } from '@angular/forms';
 
 import { BusSnapshotComponent } from '../../components/bus-snapshot/bus-snapshot.component';
@@ -12,15 +8,12 @@ import { FacilityStripsComponent } from './facility-strips/facility-strips.compo
 import { FacilitySearchComponent } from './facility-search/facility-search.component';
 
 import { FleetService } from '../../data/fleet.service';
-import {
-  CATEGORIES,
-  FACILITIES,
-  CategoryId,
-  Board,
-  BusDetails,
-  FacilityId,
-  FacilityConfig,
-} from '../../data/fleet-store';  
+import { CATEGORIES, FACILITIES, CategoryId, Board, BusDetails, FacilityId, FacilityConfig } from '../../data/fleet-store';
+
+import { FacilityButtonsComponent } from './facility-buttons/facility-buttons.component';
+import { FacilitySearchResultComponent } from './facility-search-result/facility-search-result.component';
+import { FacilityColumnsComponent, FacilityColumnVm } from './facility-columns/facility-columns.component';
+import { FacilityBayComponent } from './facility-bay/facility-bay.component';
 
 type Facility = FacilityConfig;
 type BayModalMode = 'internal_select';
@@ -38,6 +31,10 @@ type SelectedId = FacilityId | '__ALL__';
     BusSnapshotComponent,
     FacilityStripsComponent,
     FacilitySearchComponent,
+    FacilityButtonsComponent,
+    FacilityColumnsComponent,
+    FacilitySearchResultComponent,
+    FacilityBayComponent,
   ],
   templateUrl: './vehicle-management.component.html',
   styleUrl: './vehicle-management.component.scss',
@@ -109,6 +106,16 @@ export class VehicleManagementComponent {
       return this.facilities[0]?.id;
     }
     return this.selectedFacilityId;
+  }
+
+  get columnsView(): FacilityColumnVm[] {
+    return this.categories.map((c) => ({
+      id: c.id,
+      label: c.label,
+      dropListId: this.dropListId(c.id),
+      buses: this.board[c.id],
+      count: this.board[c.id].length,
+    }));
   }
 
   // label for board title
@@ -186,6 +193,14 @@ export class VehicleManagementComponent {
   facilityTotal(facilityId: FacilityId): number {
     const b = this.fleet.getBoard(facilityId);
     return this.categories.reduce((sum, c) => sum + b[c.id].length, 0);
+  }
+
+  get facilityTotalsById(): Partial<Record<FacilityId, number>> {
+    const totals: Partial<Record<FacilityId, number>> = {};
+    for (const f of this.facilities) {
+      totals[f.id] = this.facilityTotal(f.id);
+    }
+    return totals;
   }
 
   allFacilitiesTotal(): number {

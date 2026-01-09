@@ -1,0 +1,76 @@
+<div class="search-panel">
+  <div class="search-panel-header">
+    <div class="search-title">Search Results</div>
+    <div class="search-sub">
+      Matches in {{ selectedFacilityLabel }} (drag into columns)
+    </div>
+  </div>
+
+  <div
+    class="search-dropzone"
+    cdkDropList
+    [id]="searchDropListId"
+    [cdkDropListData]="searchResults"
+    [cdkDropListConnectedTo]="connectedDropListIds"
+    [cdkDropListSortingDisabled]="true"
+  >
+    <div class="search-empty" *ngIf="searchResults.length === 0">
+      No buses match "{{ searchQuery }}".
+    </div>
+
+    <div
+      class="search-item"
+      *ngFor="let bus of searchResults; trackBy: trackByBusId"
+    >
+      <div
+        class="bus bus--img bus--search"
+        cdkDrag
+        [cdkDragData]="bus"
+        cdkDragPreviewContainer="global"
+        [style.--busImg]="'url(' + busImageUrl + ')'"
+      >
+        <div class="bus-top">
+          <div class="bus-badge">{{ bus.label }}</div>
+
+          <!-- Hide bay display when bus is currently in off-site(third_party) -->
+          <div
+            class="bus-loc"
+            *ngIf="bus.bay != null && searchMetaById[bus.id]?.categoryId !== 'third_party'"
+          >
+            Bay {{ bus.bay }}
+          </div>
+        </div>
+
+        <ng-template cdkDragPlaceholder>
+          <div class="bus bus--placeholder bus--placeholder--search"></div>
+        </ng-template>
+
+        <ng-template cdkDragPreview>
+          <div
+            class="bus bus--img bus--preview"
+            [style.background-image]="'url(' + busImageUrl + ')'"
+            style="background-size: cover; background-position: center;"
+          >
+            <div class="bus-top">
+              <div class="bus-badge">{{ bus.label }}</div>
+
+              <div
+                class="bus-loc"
+                *ngIf="bus.bay != null && searchMetaById[bus.id]?.categoryId !== 'third_party'"
+              >
+                Bay {{ bus.bay }}
+              </div>
+            </div>
+          </div>
+        </ng-template>
+      </div>
+
+      <div class="search-meta">
+        <span class="search-meta-label">In:</span>
+        <span class="search-meta-value">
+          {{ searchMetaById[bus.id]?.categoryLabel }}
+        </span>
+      </div>
+    </div>
+  </div>
+</div>

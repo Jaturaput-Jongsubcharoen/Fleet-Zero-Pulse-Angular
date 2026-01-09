@@ -1,0 +1,39 @@
+<div class="columns">
+  <div class="col" *ngFor="let col of columns; trackBy: trackByCategoryId">
+    <div class="col-card" [class.col-card--third-party]="col.id === 'third_party'" [class.col-card--bay-required]="col.id === 'maintenance' || col.id === 'long_term'">
+      <div class="col-header">
+        <span class="col-name">{{ col.label }}</span>
+      </div>
+      <div class="col-header">
+        <span class="col-count">({{ col.count }} buses)</span>
+      </div>
+
+      <div class="dropzone" cdkDropList [id]="col.dropListId" [cdkDropListData]="col.buses" [cdkDropListConnectedTo]="connectedDropListIds" (cdkDropListDropped)="onDrop(col.id, $event)">
+        <div class="bus bus--img" *ngFor="let bus of col.buses; trackBy: trackByBusId" cdkDrag [cdkDragData]="bus" cdkDragPreviewContainer="global" (dblclick)="onOpenSnapshot(bus, col.label)" [style.--busImg]="'url(' + busImageUrl + ')'">
+          <div class="bus-top">
+            <div class="bus-badge">{{ bus.label }}</div>
+
+                <div class="bus-loc" *ngIf="bus.bay != null && (col.id === 'maintenance' || col.id === 'long_term')">
+                Bay {{ bus.bay }}
+                </div>
+          </div>
+
+          <ng-template cdkDragPlaceholder>
+            <div class="bus bus--placeholder"></div>
+          </ng-template>
+
+          <ng-template cdkDragPreview>
+            <div class="bus bus--img bus--preview" [style.background-image]="'url(' + busImageUrl + ')'" style="background-size: cover; background-position: center;">
+              <div class="bus-top">
+                <div class="bus-badge">{{ bus.label }}</div>
+                <div class="bus-loc" *ngIf="bus.bay != null && col.id !== 'third_party'">
+                  Bay {{ bus.bay }}
+                </div>
+              </div>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

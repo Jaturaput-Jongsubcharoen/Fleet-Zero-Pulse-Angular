@@ -1,0 +1,106 @@
+.fac-item {
+  flex: 0 0 auto;
+  min-width: 220px;
+  border-radius: 14px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fac-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.fac-item.active {
+  background: rgba(31, 139, 58, 0.25);
+  box-shadow: inset 0 0 0 1px rgba(0, 255, 64, 0.6);
+  color: rgba(0, 255, 64, 0.8);
+}
+
+.fac-item .name {
+  font-weight: 900;
+}
+
+.fac-item .count {
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+/* Layout for All Facilities + list */
+.fac-items {
+  display: grid;
+  grid-template-columns: 210px 1fr;
+  align-items: start;
+}
+
+/* scroll area */
+.fac-col-list {
+  min-width: 0;
+}
+
+.fac-scroll {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-gutter: stable;
+  scroll-snap-type: x mandatory;
+}
+
+.fac-scroll .fac-item {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+}
+
+/* make the All button visually “special” */
+.fac-item--all {
+  width: 100%;
+}
+
+/* scrollbar styles (optional) */
+.fac-items {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.35) rgba(255, 255, 255, 0.08);
+  padding-bottom: 6px;
+}
+
+.fac-items::-webkit-scrollbar {
+  height: 10px;
+}
+
+.fac-items::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+}
+
+.fac-items::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  border: 2px solid rgba(74, 79, 73);
+}
+
+.fac-items::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.55);
+}
+
+/* responsive bits you had for facilities */
+@media (max-width: 720px) {
+  .fac-items {
+    grid-template-columns: 1fr;
+  }
+  .fac-item--all {
+    width: 100%;
+  }
+}
+
+@media (max-width: 650px) {
+  .fac-item {
+    min-width: clamp(170px, 18vw, 220px);
+  }
+}
