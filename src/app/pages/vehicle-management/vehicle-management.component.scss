@@ -148,9 +148,10 @@
   display: grid;
   gap: 18px;
 
-  /* auto-fit columns based on available width */
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  /* Desktop / laptop: always 5 columns */
+  grid-template-columns: repeat(6, minmax(0, 1fr));
 }
+
 
 .col-card {
   border-radius: 20px;
@@ -581,8 +582,14 @@
     padding: 26px 18px 40px;
   }
 
+  /* On phones: 1 column per row (6 rows) */
   .columns {
-    grid-template-columns: 1fr;
+    flex-direction: column;
+    overflow-x: visible;
+  }
+
+  .columns .col {
+    flex: 0 0 auto;   /* let them take full width */
   }
 
   /* Facilities still horizontal, but smaller cards */
@@ -590,6 +597,8 @@
     min-width: clamp(170px, 18vw, 220px);
   }
 }
+
+
 
 @media (max-width: 720px) {
   .fac-items {

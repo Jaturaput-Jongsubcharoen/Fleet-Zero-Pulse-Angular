@@ -17,6 +17,10 @@ import {
   registerables,
 } from 'chart.js';
 
+import ChartDataLabels from 'chartjs-plugin-datalabels';
+
+Chart.register(ChartDataLabels);
+
 // register all default chart.js controllers/parts
 Chart.register(...registerables);
 
@@ -45,52 +49,46 @@ export class SpkChartjsComponent
   @ViewChild('canvas', { static: false })
   canvasRef!: ElementRef<HTMLCanvasElement>;
 
-  private chart?: Chart;
+  private chart: Chart | null = null;
 
-  // create chart when the view is ready
   ngAfterViewInit(): void {
     this.createChart();
   }
 
-  // update chart when inputs change
   ngOnChanges(changes: SimpleChanges): void {
-    if (!this.chart) return;
+    if (!this.canvasRef) return;
 
     if (changes['data'] || changes['type'] || changes['options']) {
-      this.updateChart();
+      this.rebuildChart();
     }
   }
 
   private createChart(): void {
-    if (!this.canvasRef) return;
+    const canvas = this.canvasRef?.nativeElement;
+    if (!canvas) return;
 
-    const ctx = this.canvasRef.nativeElement.getContext('2d');
+    const ctx = canvas.getContext('2d');
     if (!ctx) return;
-
-    if (this.chart) {
-      this.chart.destroy();
-    }
 
     this.chart = new Chart(ctx, {
       type: this.type,
       data: this.data,
       options: this.options,
-    });
+    } as ChartConfiguration);
   }
 
-  private updateChart(): void {
-    if (!this.chart) {
-      this.createChart();
-      return;
+  private rebuildChart(): void {
+    if (this.chart) {
+      this.chart.destroy();
+      this.chart = null;
     }
-
-    this.chart.config.type = this.type;
-    this.chart.data = this.data;
-    this.chart.options = this.options;
-    this.chart.update();
+    this.createChart();
   }
 
   ngOnDestroy(): void {
-    this.chart?.destroy();
+    if (this.chart) {
+      this.chart.destroy();
+      this.chart = null;
+    }
   }
 }

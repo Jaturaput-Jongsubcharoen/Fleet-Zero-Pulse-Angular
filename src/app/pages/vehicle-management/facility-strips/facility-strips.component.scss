@@ -21,7 +21,7 @@
 .strip-title {
   font-weight: 800;
   font-size: 14px;
-  color: rgb(255, 255, 255)
+  color: #fff;
 }
 
 .strip-tag {
@@ -36,7 +36,7 @@
   margin-top: 2px;
   font-size: 12px;
   opacity: 0.85;
-  color: rgb(255, 255, 255);
+  color: #fff;
 }
 
 .strip-grid {
@@ -62,7 +62,6 @@
   margin-bottom: 8px;
 }
 
-
 .strip-row {
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) minmax(0, 2.3fr) auto;
@@ -74,7 +73,7 @@
 
 .label {
   font-weight: 600;
-  color: rgb(255, 255, 255);
+  color: #fff;
 }
 
 .value {
@@ -82,7 +81,7 @@
   flex-wrap: wrap;
   gap: 4px 8px;
   opacity: 0.9;
-  color: rgb(255, 255, 255);
+  color: #fff;
 }
 
 .value--edit {
@@ -131,37 +130,43 @@
   margin: 0 4px;
 }
 
+/* ----- metrics / charts ----- */
+
 .metrics-row {
-  margin-top: 8px;
+  margin-top: 12px;
   padding-top: 8px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
+  gap: 16px;
 }
 
 .metric-card {
+  background: #2c3236;
+  border-radius: 10px;
+  padding: 12px 14px 10px;
   font-size: 11px;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .metric-label {
-  font-weight: 600;
-  margin-bottom: 4px;
-  color: rgb(255, 255, 255);
+  font-weight: 700;
 }
 
-.bar {
-  display: flex;
-  height: 8px;
-  border-radius: 999px;
-  overflow: hidden;
-  background: rgba(0, 0, 0, 0.4);
-  margin-bottom: 4px;
+.metric-chart {
+  position: relative;
+  width: 100%;
+  max-width: 220px; /* controls overall size of doughnut */
+  margin: 0 auto;   /* center in card */
 }
 
-.bar-seg {
-  flex-shrink: 0;
-  background: rgba(255, 255, 255, 0.28);
+/* force the canvas to follow the container width */
+.metric-chart canvas {
+  width: 100% !important;
+  height: auto !important;
 }
 
 .legend {
@@ -169,7 +174,7 @@
   flex-direction: column;
   gap: 2px;
   opacity: 0.85;
-  color: rgb(255, 255, 255);
+  color: #fff;
 }
 
 @media (max-width: 900px) {
@@ -179,5 +184,9 @@
 
   .strip-grid-right {
     margin-top: 12px;
+  }
+
+  .metrics-row {
+    grid-template-columns: 1fr;
   }
 }

@@ -206,34 +206,45 @@
           </div>
         </div>
 
-
         <!-- non-editable: charts/metrics -->
         <div class="metrics-row">
+          <!-- Bus models doughnut -->
           <div class="metric-card">
             <div class="metric-label">Bus Models</div>
-            <div class="bar">
-              <div
-                *ngFor="let m of dummyModelBreakdown(f.id)"
-                class="bar-seg"
-                [style.flex]="m.pct"
-              ></div>
+
+            <div class="metric-chart">
+              <spk-chartjs
+                [data]="busModelChartData(f.id)"
+                [options]="doughnutOptions"
+                [type]="doughnutType"
+              ></spk-chartjs>
             </div>
+
+            <!-- Text legend under chart -->
+            <!--
             <div class="legend">
               <span *ngFor="let m of dummyModelBreakdown(f.id)">
                 {{ m.label }} ({{ m.pct }}%)
               </span>
             </div>
+            -->
           </div>
+          
 
+          <!-- Status of buses doughnut -->
           <div class="metric-card">
             <div class="metric-label">Status of Buses</div>
-            <div class="bar">
-              <div
-                *ngFor="let s of statusBreakdown(f.id); trackBy: trackByStatusLabel"
-                class="bar-seg"
-                [style.flex]="s.pct"
-              ></div>
+
+            <div class="metric-chart">
+              <spk-chartjs
+                [data]="statusChartData(f.id)"
+                [options]="doughnutOptions"
+                [type]="doughnutType"
+              ></spk-chartjs>
             </div>
+
+            <!-- Text legend under chart -->
+            <!--
             <div class="legend">
               <span
                 *ngFor="let s of statusBreakdown(f.id); trackBy: trackByStatusLabel"
@@ -241,8 +252,10 @@
                 {{ s.label }} ({{ s.pct }}%)
               </span>
             </div>
+            -->
           </div>
         </div>
+
       </ng-container>
     </div>
   </ng-container>

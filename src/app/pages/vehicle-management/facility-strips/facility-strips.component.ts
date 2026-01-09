@@ -1,6 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ChartConfiguration, ChartType } from 'chart.js';
+
+import { SpkChartjsComponent } from '../../../@spk/reusable-charts/spk-chartjs/spk-chartjs.component';
 
 import {
   CATEGORIES,
@@ -12,9 +15,6 @@ import {
   EditableFacilityInfo,
 } from '../../../data/facility-meta-store';
 import { FacilityMetaService } from '../../../data/facility-meta.service';
-
-import { ChartConfiguration, ChartType } from 'chart.js';
-import { SpkChartjsComponent } from '../../../@spk/reusable-charts/spk-chartjs/spk-chartjs.component';
 
 // same union as in vehicle-management
 type SelectedId = FacilityId | '__ALL__';
@@ -28,7 +28,7 @@ type StatusSegment = { label: StatusLabel; pct: number };
 @Component({
   selector: 'app-facility-strips',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, SpkChartjsComponent],
   templateUrl: './facility-strips.component.html',
   styleUrl: './facility-strips.component.scss',
 })
@@ -41,6 +41,56 @@ export class FacilityStripsComponent {
 
   // which field is currently in "edit" mode
   editing: { facilityId: FacilityId; field: EditableFieldKey } | null = null;
+
+  // ---- chart config for the doughnut charts ----
+  readonly doughnutType: ChartType = 'doughnut';
+
+  // keep this generic ChartConfiguration['options'] so typing is happy
+  readonly doughnutOptions: ChartConfiguration['options'] = {
+    responsive: true,
+    maintainAspectRatio: true,
+    aspectRatio: 1.6,
+    plugins: {
+      legend: {
+        display: false, // we keep our own legends / or remove them
+      },
+      tooltip: {
+        enabled: true, // still show tooltip on hover if you like
+      },
+      // ⬇️ NEW: labels inside each slice
+      datalabels: {
+        color: '#ffffff',
+        // Put the text in the middle of each arc
+        anchor: 'center',
+        align: 'center',
+        clamp: true,
+        clip: false,
+        formatter: (value, ctx) => {
+          const labels = ctx.chart.data.labels as string[] | undefined;
+          const label = labels ? labels[ctx.dataIndex] : '';
+          return `${label}\n${value}%`;
+        },
+        font: (ctx) => {
+          // make percent a bit larger than label
+          const line = ctx.dataIndex;
+          return {
+            size: 9, // base
+            weight: 'bold'
+          };
+        }
+      },
+    },
+  };
+
+  // shared color palette (just re-use for all doughnut charts)
+  private readonly chartColors = [
+    '#6259ca',
+    '#53caed',
+    '#01b8ff',
+    '#f16d75',
+    '#29ccbb',
+    '#19b159',
+  ];
 
   constructor(
     private fleet: FleetService,
@@ -94,6 +144,38 @@ export class FacilityStripsComponent {
     return this.facilityMeta.getModelBreakdown(fid);
   }
 
+  // ---- chart data builders ----
+
+  // Doughnut data for "Bus Models"
+  busModelChartData(fid: FacilityId): ChartConfiguration['data'] {
+    const breakdown = this.dummyModelBreakdown(fid);
+    return {
+      labels: breakdown.map((m) => m.label),
+      datasets: [
+        {
+          data: breakdown.map((m) => m.pct),
+          backgroundColor: this.chartColors.slice(0, breakdown.length),
+          borderWidth: 0,
+        },
+      ],
+    };
+  }
+
+  // Doughnut data for "Status of Buses"
+  statusChartData(fid: FacilityId): ChartConfiguration['data'] {
+    const breakdown = this.statusBreakdown(fid);
+    return {
+      labels: breakdown.map((s) => s.label),
+      datasets: [
+        {
+          data: breakdown.map((s) => s.pct),
+          backgroundColor: this.chartColors.slice(0, breakdown.length),
+          borderWidth: 0,
+        },
+      ],
+    };
+  }
+
   // ---- editing helpers ----
 
   isEditing(fid: FacilityId, field: EditableFieldKey): boolean {
@@ -105,8 +187,7 @@ export class FacilityStripsComponent {
 
   toggleEdit(fid: FacilityId, field: EditableFieldKey) {
     if (this.isEditing(fid, field)) {
-      // for now we just close edit mode; later you can call
-      // this.facilityMeta.updateEditableInfo(fid, { ... });
+      // for now we just close edit mode; later you can persist via facilityMeta
       this.editing = null;
     } else {
       this.editing = { facilityId: fid, field };
