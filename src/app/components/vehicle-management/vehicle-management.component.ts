@@ -3,17 +3,17 @@ import { Component } from '@angular/core';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { FormsModule } from '@angular/forms';
 
-import { BusSnapshotComponent } from '../../components/bus-snapshot/bus-snapshot.component';
-import { FacilityStripsComponent } from './facility-strips/facility-strips.component';
-import { FacilitySearchComponent } from './facility-search/facility-search.component';
+import { BusSnapshotComponent } from '../bus-snapshot/bus-snapshot.component';
+import { FacilityStripsComponent } from '../facilities/facility-strips/facility-strips.component';
+import { FacilitySearchComponent } from '../facilities/facility-search/facility-search.component';
 
 import { FleetService } from '../../data/fleet.service';
 import { CATEGORIES, FACILITIES, CategoryId, Board, BusDetails, FacilityId, FacilityConfig } from '../../data/fleet-store';
 
-import { FacilityButtonsComponent } from './facility-buttons/facility-buttons.component';
-import { FacilitySearchResultComponent } from './facility-search-result/facility-search-result.component';
-import { FacilityColumnsComponent, FacilityColumnVm } from './facility-columns/facility-columns.component';
-import { FacilityBayComponent } from './facility-bay/facility-bay.component';
+import { FacilityButtonsComponent } from '../facilities/facility-buttons/facility-buttons.component';
+import { FacilitySearchResultComponent } from '../facilities/facility-search-result/facility-search-result.component';
+import { FacilityColumnsComponent, FacilityColumnVm } from '../facilities/facility-columns/facility-columns.component';
+import { FacilityBayComponent } from '../facilities/facility-bay/facility-bay.component';
 
 type Facility = FacilityConfig;
 type BayModalMode = 'internal_select';

@@ -20,7 +20,7 @@ export class FleetService {
     return this.boards[facilityId];
   }
 
-  // ✅ merge multiple facilities into one board (READ-ONLY view)
+  // merge multiple facilities into one board (READ-ONLY view)
   getMergedBoard(facilityIds: FacilityId[]): Board {
     const empty: Board = {
       maintenance: [],
@@ -56,13 +56,6 @@ export class FleetService {
     list[idx] = { ...list[idx], ...patch };
   }
 
-  /**
-   * Bay rules (UPDATED):
-   * - maintenance/long_term: bay REQUIRED + must be in FACILITY_BAYS + not taken
-   *   (bay uniqueness shared between maintenance + long_term)
-   * - all other columns (storage, in_service, out_of_service, third_party):
-   *   bay is NOT required, and should be removed when moving into them
-   */
   moveBusCategory(
     facilityId: FacilityId,
     fromCategory: CategoryId,
@@ -112,7 +105,7 @@ export class FleetService {
 
       bus.bay = normalizedBay;
     } else {
-      // moving into non-bay columns (including off-site) => remove bay
+      // moving into non-bay columns (including off-site) remove bay
       delete bus.bay;
     }
 
