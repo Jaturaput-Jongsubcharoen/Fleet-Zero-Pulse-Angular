@@ -118,14 +118,12 @@ export class VehicleManagementComponent {
     }));
   }
 
-  // label for board title
   get selectedFacilityLabel(): string {
     return this.isAllSelected(this.selectedFacilityId)
       ? 'All Facilities'
       : this.selectedFacility.name;
   }
 
-  // Bus silhouette image (no hardcoded map; driven by FACILITIES config)
   getFacilityBusImageUrl(): string {
     const facId = this.resolvedFacilityId;
     const fac = this.facilities.find((f) => f.id === facId);
@@ -137,7 +135,6 @@ export class VehicleManagementComponent {
     );
   }
 
-  // Board (either single facility OR merged)
   get board(): Board {
     if (this.isAllSelected(this.selectedFacilityId)) {
       return this.fleet.getMergedBoard(this.facilities.map((f) => f.id));
@@ -339,7 +336,7 @@ export class VehicleManagementComponent {
     if (this.showSearchRow) this.refreshSearch();
   }
 
-  // ---------- Bay Modal ----------
+  // Bay Modal still I think I have to fix just a reminder
   private openBayModalInternalSelect(
     busId: string,
     fromCatId: CategoryId,
@@ -404,7 +401,7 @@ export class VehicleManagementComponent {
     this.cancelBayModal();
   }
 
-  // Snapshot modal
+  // Snapshot modal still I think I have to fix just a reminder
   openBusSnapshot(bus: BusDetails, statusLabel: string) {
     const resolvedFacilityId: FacilityId | undefined = this.isAllSelected(
       this.selectedFacilityId

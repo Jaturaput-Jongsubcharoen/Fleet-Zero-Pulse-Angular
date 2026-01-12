@@ -32,7 +32,6 @@
         <div class="bus-top">
           <div class="bus-badge">{{ bus.label }}</div>
 
-          <!-- Hide bay display when bus is currently in off-site(third_party) -->
           <div
             class="bus-loc"
             *ngIf="bus.bay != null && searchMetaById[bus.id]?.categoryId !== 'third_party'"

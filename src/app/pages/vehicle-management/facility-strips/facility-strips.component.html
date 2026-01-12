@@ -1,7 +1,6 @@
 <div class="facility-strips">
   <ng-container *ngFor="let f of facilitiesToShow; trackBy: trackByFacilityId">
     <div class="strip-card">
-      <!-- header -->
       <div class="strip-header">
         <div class="strip-title">
           {{ f.name }}
@@ -16,7 +15,6 @@
       <ng-container *ngIf="getInfo(f.id) as info">
         <!-- editable info rows -->
         <div class="strip-grid">
-          <!-- LEFT COLUMN: all text fields -->
           <div class="strip-grid-left">
             <!-- Address & coordinates -->
             <div class="strip-row">
@@ -169,7 +167,6 @@
             </div>
           </div>
 
-          <!-- RIGHT COLUMN: only garage picture -->
           <div class="strip-grid-right">
             <div class="strip-row strip-row--garage">
               <div class="label">Garage Picture</div>
