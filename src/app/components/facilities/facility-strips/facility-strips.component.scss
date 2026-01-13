@@ -158,15 +158,16 @@
 
 .metric-chart {
   position: relative;
-  width: 100%;
-  max-width: 220px; /* controls overall size of doughnut */
-  margin: 0 auto;   /* center in card */
+  width: 100%;        /* take full card width */
+  height: 100%;      /* chart height – make this bigger/smaller */
+  max-width: none;    /* no cap – fill the grid column */
+  margin: 0 auto;
 }
 
 /* force the canvas to follow the container width */
 .metric-chart canvas {
   width: 100% !important;
-  height: auto !important;
+  height: 100% !important;
 }
 
 .legend {

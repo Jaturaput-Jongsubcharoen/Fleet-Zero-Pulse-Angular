@@ -65,22 +65,19 @@ export class FacilityStripsComponent {
         align: 'center',
         clamp: true,
         clip: false,
-        formatter: (value, ctx) => {
+        formatter: (value: number | string, ctx: any) => {
           const labels = ctx.chart.data.labels as string[] | undefined;
           const label = labels ? labels[ctx.dataIndex] : '';
           return `${label}\n${value}%`;
         },
-        font: (ctx) => {
-          // make percent a bit larger than label
-          const line = ctx.dataIndex;
-          return {
-            size: 9, // base
-            weight: 'bold'
-          };
-        }
-      },
-    },
+        font: (_ctx: any) => ({
+          size: 9,
+          weight: 'bold',
+        }),
+      } as any,
+    } as any,
   };
+
 
   // shared color palette (just re-use for all doughnut charts)
   private readonly chartColors = [
