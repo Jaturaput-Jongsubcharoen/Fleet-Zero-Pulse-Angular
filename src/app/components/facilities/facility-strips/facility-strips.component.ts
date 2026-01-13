@@ -5,15 +5,9 @@ import { ChartConfiguration, ChartType } from 'chart.js';
 
 import { SpkChartjsComponent } from '../../../@spk/reusable-charts/spk-chartjs/spk-chartjs.component';
 
-import {
-  CATEGORIES,
-  FacilityConfig,
-  FacilityId,
-} from '../../../data/fleet-store';
+import { CATEGORIES, FacilityConfig, FacilityId, CategoryId, } from '../../../data/fleet-store';
 import { FleetService } from '../../../data/fleet.service';
-import {
-  EditableFacilityInfo,
-} from '../../../data/facility-meta-store';
+import { EditableFacilityInfo, } from '../../../data/facility-meta-store';
 import { FacilityMetaService } from '../../../data/facility-meta.service';
 
 // same union as in vehicle-management
@@ -83,15 +77,19 @@ export class FacilityStripsComponent {
     '#19b159',
   ];
 
-  private readonly statusColorMap: Record<StatusLabel, string> = {
-    'Storage': '#6259ca',
-    'In-Service': '#53caed',
-    'Out of service': '#01b8ff',
-    'Maintenance': '#f16d75',
-    'Long-term Maintenance': '#29ccbb',
-    'Off-Site Maintenance': '#19b159',
-  };
+  private readonly statusColorByLabel: Record<StatusLabel, string> =
+    CATEGORIES.reduce((acc, cat) => {
+      acc[cat.label as StatusLabel] = cat.color;
+      return acc;
+    }, {} as Record<StatusLabel, string>);
 
+  private readonly statusColorById: Record<CategoryId, string> =
+    CATEGORIES.reduce((acc, cat) => {
+      acc[cat.id] = cat.color;
+      return acc;
+    }, {} as Record<CategoryId, string>);
+
+  // still OK to keep model colors here (they do not live in fleet-store)
   private readonly modelColorMap: Record<string, string> = {
     '40ft Diesel': '#6259ca',
     '60ft Diesel': '#53caed',
@@ -141,7 +139,7 @@ export class FacilityStripsComponent {
       const count = board[c.id].length;
       if (!count) return null;
       const pct = Math.round((count / total) * 100);
-      return { label: c.label, pct };
+      return { label: c.label as StatusLabel, pct };
     });
 
     return rows.filter((x): x is StatusSegment => x !== null);
@@ -161,9 +159,9 @@ export class FacilityStripsComponent {
       datasets: [
         {
           data: breakdown.map((m) => m.pct),
-          // 🔹 use label -> color map so colors don't shift
-          backgroundColor: breakdown.map(
-            (m, idx) => this.modelColorMap[m.label] ?? this.chartColors[idx % this.chartColors.length]
+          backgroundColor: breakdown.map((m, idx) =>
+            this.modelColorMap[m.label] ??
+            this.chartColors[idx % this.chartColors.length]
           ),
           borderWidth: 0,
         },
@@ -179,9 +177,9 @@ export class FacilityStripsComponent {
       datasets: [
         {
           data: breakdown.map((s) => s.pct),
-          // 🔹 use label -> color map so colors stay attached to each status
-          backgroundColor: breakdown.map(
-            (s, idx) => this.statusColorMap[s.label] ?? this.chartColors[idx % this.chartColors.length]
+          backgroundColor: breakdown.map((s, idx) =>
+            this.statusColorByLabel[s.label] ??
+            this.chartColors[idx % this.chartColors.length]
           ),
           borderWidth: 0,
         },

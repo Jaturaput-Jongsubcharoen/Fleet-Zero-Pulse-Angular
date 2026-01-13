@@ -29,14 +29,21 @@ export type BusDetails = {
 
 export type Board = Record<CategoryId, BusDetails[]>;
 
-export const CATEGORIES = [
-  { id: 'storage', label: 'Storage' },
-  { id: 'in_service', label: 'In-Service' },
-  { id: 'out_of_service', label: 'Out of service' },
-  { id: 'maintenance', label: 'Maintenance' },
-  { id: 'long_term', label: 'Long-term Maintenance' },
-  { id: 'third_party', label: 'Off-Site Maintenance' },
+export type CategoryConfig = {
+  id: CategoryId;
+  label: string;
+  color: string;
+};
+
+export const CATEGORIES: readonly CategoryConfig[] = [
+  { id: 'storage',        label: 'Storage',               color: '#6259ca' },
+  { id: 'in_service',     label: 'In-Service',            color: '#53caed' },
+  { id: 'out_of_service', label: 'Out of service',        color: '#01b8ff' },
+  { id: 'maintenance',    label: 'Maintenance',           color: '#f16d75' },
+  { id: 'long_term',      label: 'Long-term Maintenance', color: '#29ccbb' },
+  { id: 'third_party',    label: 'Off-Site Maintenance',  color: '#19b159' },
 ] as const;
+
 
 export const FACILITIES: readonly FacilityConfig[] = [
   {
