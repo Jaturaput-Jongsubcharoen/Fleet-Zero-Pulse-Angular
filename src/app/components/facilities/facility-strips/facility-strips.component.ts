@@ -18,7 +18,6 @@ import { FacilityMetaService } from '../../../data/facility-meta.service';
 
 // same union as in vehicle-management
 type SelectedId = FacilityId | '__ALL__';
-
 type EditableFieldKey = keyof EditableFacilityInfo;
 
 // ---- status breakdown types (for chart rows) ----
@@ -45,22 +44,19 @@ export class FacilityStripsComponent {
   // ---- chart config for the doughnut charts ----
   readonly doughnutType: ChartType = 'doughnut';
 
-  // keep this generic ChartConfiguration['options'] so typing is happy
   readonly doughnutOptions: ChartConfiguration['options'] = {
     responsive: true,
     maintainAspectRatio: true,
     aspectRatio: 1.6,
     plugins: {
       legend: {
-        display: false, // we keep our own legends / or remove them
+        display: false,
       },
       tooltip: {
-        enabled: true, // still show tooltip on hover if you like
+        enabled: true,
       },
-      // NEW: labels inside each slice
       datalabels: {
         color: '#ffffff',
-        // Put the text in the middle of each arc
         anchor: 'center',
         align: 'center',
         clamp: true,
@@ -78,8 +74,6 @@ export class FacilityStripsComponent {
     } as any,
   };
 
-
-  // shared color palette (just re-use for all doughnut charts)
   private readonly chartColors = [
     '#6259ca',
     '#53caed',
@@ -88,6 +82,22 @@ export class FacilityStripsComponent {
     '#29ccbb',
     '#19b159',
   ];
+
+  private readonly statusColorMap: Record<StatusLabel, string> = {
+    'Storage': '#6259ca',
+    'In-Service': '#53caed',
+    'Out of service': '#01b8ff',
+    'Maintenance': '#f16d75',
+    'Long-term Maintenance': '#29ccbb',
+    'Off-Site Maintenance': '#19b159',
+  };
+
+  private readonly modelColorMap: Record<string, string> = {
+    '40ft Diesel': '#6259ca',
+    '60ft Diesel': '#53caed',
+    '40ft Electric': '#01b8ff',
+    'Other': '#f16d75',
+  };
 
   constructor(
     private fleet: FleetService,
@@ -143,7 +153,7 @@ export class FacilityStripsComponent {
 
   // ---- chart data builders ----
 
-  // Doughnut data for "Bus Models"
+  // Bus Models doughnut
   busModelChartData(fid: FacilityId): ChartConfiguration['data'] {
     const breakdown = this.dummyModelBreakdown(fid);
     return {
@@ -151,14 +161,17 @@ export class FacilityStripsComponent {
       datasets: [
         {
           data: breakdown.map((m) => m.pct),
-          backgroundColor: this.chartColors.slice(0, breakdown.length),
+          // 🔹 use label -> color map so colors don't shift
+          backgroundColor: breakdown.map(
+            (m, idx) => this.modelColorMap[m.label] ?? this.chartColors[idx % this.chartColors.length]
+          ),
           borderWidth: 0,
         },
       ],
     };
   }
 
-  // Doughnut data for "Status of Buses"
+  // Status of Buses doughnut
   statusChartData(fid: FacilityId): ChartConfiguration['data'] {
     const breakdown = this.statusBreakdown(fid);
     return {
@@ -166,7 +179,10 @@ export class FacilityStripsComponent {
       datasets: [
         {
           data: breakdown.map((s) => s.pct),
-          backgroundColor: this.chartColors.slice(0, breakdown.length),
+          // 🔹 use label -> color map so colors stay attached to each status
+          backgroundColor: breakdown.map(
+            (s, idx) => this.statusColorMap[s.label] ?? this.chartColors[idx % this.chartColors.length]
+          ),
           borderWidth: 0,
         },
       ],
@@ -184,7 +200,6 @@ export class FacilityStripsComponent {
 
   toggleEdit(fid: FacilityId, field: EditableFieldKey) {
     if (this.isEditing(fid, field)) {
-      // for now we just close edit mode; later you can persist via facilityMeta
       this.editing = null;
     } else {
       this.editing = { facilityId: fid, field };
