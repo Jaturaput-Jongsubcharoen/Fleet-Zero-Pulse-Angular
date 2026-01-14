@@ -4,13 +4,13 @@ import { Component, Input, ViewChild } from '@angular/core';
 import { BaseChartDirective } from 'ng2-charts';
 
 @Component({
-  selector: 'spk-chartjs',
+  selector: 'spk-chartjs2',
   standalone: true,
   imports: [BaseChartDirective],
-  templateUrl: './spk-chartjs.component.html',
-  styleUrl: './spk-chartjs.component.scss'
+  templateUrl: './spk-chartjs2.component.html',
+  styleUrl: './spk-chartjs2.component.scss'
 })
-export class SpkChartjsComponent {
+export class SpkChartjs2Component {
   @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
   @Input('data') ChartData: any;
   @Input('options') ChartOptions: any;

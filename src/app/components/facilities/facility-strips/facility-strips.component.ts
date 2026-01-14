@@ -3,7 +3,7 @@ import { Component, Input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ChartConfiguration, ChartType } from 'chart.js';
 
-import { SpkChartjsComponent } from '../../../@spk/reusable-charts/spk-chartjs/spk-chartjs.component';
+import { SpkChartjs2Component } from '../../../@spk/reusable-charts/spk-chartjs2/spk-chartjs2.component';
 
 import { CATEGORIES, FacilityConfig, FacilityId, CategoryId, } from '../../../data/fleet-store';
 import { FleetService } from '../../../data/fleet.service';
@@ -21,7 +21,7 @@ type StatusSegment = { label: StatusLabel; pct: number };
 @Component({
   selector: 'app-facility-strips',
   standalone: true,
-  imports: [CommonModule, FormsModule, SpkChartjsComponent],
+  imports: [CommonModule, FormsModule, SpkChartjs2Component],
   templateUrl: './facility-strips.component.html',
   styleUrl: './facility-strips.component.scss',
 })
